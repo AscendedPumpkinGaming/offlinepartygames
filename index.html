@@ -597,10 +597,256 @@
     .top-tools,.keybind-bar{gap:6px}
     .tool-toggle,.preset-btn,.ghost-btn{padding:9px 10px}
   }
+  .tag-arena{
+    --tag-size:9;
+    width:min(620px,96vw);
+    margin:16px auto;
+    display:grid;
+    grid-template-columns:repeat(var(--tag-size),1fr);
+    gap:4px;
+    padding:8px;
+    border-radius:18px;
+    background:#0b1220;
+    border:2px solid rgba(255,255,255,.14);
+    touch-action:none;
+    user-select:none;
+  }
+  .tag-cell{
+    aspect-ratio:1;
+    display:grid;
+    place-items:center;
+    border-radius:8px;
+    background:linear-gradient(145deg,#243148,#172033);
+    border:1px solid rgba(255,255,255,.08);
+    font-size:clamp(1.25rem,5vw,2.7rem);
+    position:relative;
+  }
+  .tag-cell.tagger{
+    outline:3px solid #ef4444;
+    box-shadow:0 0 16px rgba(239,68,68,.65);
+  }
+  .tag-cell.runner{
+    outline:3px solid #22c55e;
+    box-shadow:0 0 12px rgba(34,197,94,.35);
+  }
+  .tag-controls{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+    max-width:760px;
+    margin:14px auto;
+  }
+  .dpad-panel{
+    background:#172033;
+    border:1px solid rgba(255,255,255,.1);
+    border-radius:16px;
+    padding:12px;
+    text-align:center;
+  }
+  .dpad{
+    width:min(220px,100%);
+    margin:8px auto 0;
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:7px;
+  }
+  .dpad button{
+    min-height:54px;
+    border:0;
+    border-radius:12px;
+    font-size:1.35rem;
+    font-weight:900;
+    cursor:pointer;
+    background:#334155;
+    color:#fff;
+    touch-action:manipulation;
+  }
+  .dpad button:active{transform:scale(.94);background:#475569}
+  .dpad .blank{visibility:hidden}
+  .tag-legend{
+    display:flex;
+    justify-content:center;
+    gap:18px;
+    flex-wrap:wrap;
+    margin:8px;
+  }
+  .tag-dot{display:inline-block;width:13px;height:13px;border-radius:50%;margin-right:6px}
+  .tag-dot.red{background:#ef4444}.tag-dot.green{background:#22c55e}
+  .website-corner{
+    position:fixed;
+    right:10px;
+    bottom:8px;
+    z-index:60;
+    max-width:min(390px,70vw);
+    padding:7px 10px;
+    border-radius:10px;
+    background:rgba(2,6,23,.9);
+    border:1px solid rgba(255,255,255,.16);
+    color:#bfdbfe;
+    font-size:.74rem;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .website-corner a{color:#bfdbfe;text-decoration:none}
+  @media(max-width:700px){
+    .tag-controls{grid-template-columns:1fr}
+    .tag-arena{gap:3px;padding:5px}
+    .tag-cell{border-radius:5px}
+    .website-corner{right:6px;bottom:5px;max-width:74vw;font-size:.64rem}
+  }
+
+
+  .site-label a{
+    color:inherit;
+    text-decoration:none;
+  }
+  .site-label{
+    max-width:min(430px,76vw);
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+
+  .tag-cell.wall-object{
+    background:linear-gradient(145deg,#475569,#1e293b);
+    border:2px solid #94a3b8;
+  }
+  .tag-cell.ice-object{
+    background:linear-gradient(145deg,#dbeafe,#7dd3fc);
+    color:#0f172a;
+  }
+  .tag-cell.boost-object{
+    background:linear-gradient(145deg,#fde68a,#f59e0b);
+    color:#111827;
+  }
+  .tag-cell.shield-object{
+    background:linear-gradient(145deg,#c4b5fd,#7c3aed);
+  }
+  .tag-object-key{
+    max-width:780px;
+    margin:10px auto;
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:8px;
+  }
+  .tag-object-chip{
+    background:#172033;
+    border:1px solid rgba(255,255,255,.12);
+    border-radius:999px;
+    padding:7px 10px;
+    font-size:.82rem;
+  }
+
+
+  .tag-arena{
+    width:min(760px,96vw);
+    max-height:none;
+    overflow:visible;
+    scroll-margin:0;
+  }
+  .tag-cell,
+  .tag-cell *{
+    scroll-margin:0!important;
+  }
+  .tag-controls.bot-mode .dpad-panel:nth-child(2){
+    opacity:.45;
+    pointer-events:none;
+  }
+  .tag-controls.bot-mode .dpad-panel:nth-child(2)::after{
+    content:"Bot controlled";
+    display:block;
+    margin-top:8px;
+    font-size:.78rem;
+    color:#cbd5e1;
+  }
+
+
+  .tag-cell.portal-object{
+    background:radial-gradient(circle,#f0abfc 0 24%,#7e22ce 26% 52%,#312e81 55% 100%);
+    border:2px solid #e879f9;
+    box-shadow:inset 0 0 12px rgba(255,255,255,.5),0 0 12px rgba(217,70,239,.45);
+  }
+  .tag-bot-speech{
+    max-width:760px;
+    margin:10px auto;
+    min-height:42px;
+    border-radius:14px;
+    padding:10px 14px;
+    background:#172033;
+    border:1px solid rgba(255,255,255,.12);
+    color:#dbeafe;
+    text-align:center;
+    font-weight:700;
+  }
+  .tag-bot-count{
+    min-width:150px;
+  }
+  .connect4-board{
+    width:min(650px,96vw);
+    margin:16px auto;
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+    gap:7px;
+    padding:12px;
+    border-radius:20px;
+    background:linear-gradient(145deg,#1d4ed8,#1e3a8a);
+    border:3px solid #60a5fa;
+    box-shadow:0 14px 35px rgba(0,0,0,.35);
+    touch-action:manipulation;
+  }
+  .connect4-cell{
+    aspect-ratio:1;
+    border:0;
+    border-radius:50%;
+    background:#0f172a;
+    display:grid;
+    place-items:center;
+    font-size:clamp(1.35rem,5vw,3rem);
+    cursor:pointer;
+    box-shadow:inset 0 4px 10px rgba(0,0,0,.65);
+  }
+  .connect4-cell:hover{outline:3px solid rgba(255,255,255,.4)}
+  .connect4-cell.p1{background:#fee2e2}
+  .connect4-cell.p2{background:#fef3c7}
+  .connect4-cell.win{
+    outline:4px solid #22c55e;
+    animation:pulseWin .7s infinite alternate;
+  }
+  .connect4-column-buttons{
+    width:min(650px,96vw);
+    margin:4px auto 0;
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+    gap:7px;
+  }
+  .connect4-column-buttons button{
+    min-height:42px;
+    border:0;
+    border-radius:10px;
+    background:#334155;
+    color:#fff;
+    font-weight:900;
+    cursor:pointer;
+    touch-action:manipulation;
+  }
+  .connect4-column-buttons button:active{transform:scale(.94)}
+  @media(max-width:700px){
+    .connect4-board{gap:4px;padding:7px}
+    .connect4-column-buttons{gap:4px}
+    .connect4-column-buttons button{min-height:38px;font-size:.8rem}
+  }
 
 </style>
 </head>
 <body>
+<script>
+document.addEventListener('gesturestart',e=>e.preventDefault(),{passive:false});
+document.addEventListener('dblclick',e=>{
+  if(e.target.closest('.connect4-board,.connect4-column-buttons'))e.preventDefault();
+},{passive:false});
+</script>
 <div class="app">
   <div class="brand-line">Local Multiplayer Collection</div>
   <h1>Offline Party Games</h1>
@@ -618,6 +864,7 @@
     <span><kbd>1</kbd> Bomb Chips</span>
     <span><kbd>2</kbd> Barrier Duel</span>
     <span><kbd>3</kbd> Tic-Tac-Toe</span>
+    <span><kbd>4</kbd> Connect Four</span>
   </div>
 
   
@@ -631,6 +878,7 @@
     <button class="tab-btn active" data-tab="bombGame">Bomb Chips</button>
     <button class="tab-btn" data-tab="barrierGame">Barrier Duel</button>
     <button class="tab-btn" data-tab="ticTacToeGame">Tic-Tac-Toe</button>
+    <button class="tab-btn" data-tab="connect4Game">Connect Four</button>
   </div>
 
   <section id="bombGame" class="game-section active">
@@ -843,15 +1091,16 @@
       <ol id="barrierHistory" class="history-list"></ol>
     </div>
   </section>
+  
   <section id="ticTacToeGame" class="game-section">
     <div class="setup">
       <div class="player-pair">
         <input class="shared-p1" value="Player 1" aria-label="Player 1 name">
-        <select id="tttSkin1"><option value="😀">😀 Classic</option><option value="🥷">🥷 Ninja</option><option value="🦊">🦊 Fox</option><option value="🐼">🐼 Panda</option><option value="🐲">🐲 Dragon</option><option value="👑">👑 Royal</option></select>
+        <select id="tttSkin1"><option value="😀">😀 Classic</option><option value="🥷">🥷 Ninja</option><option value="🤖">🤖 Robot</option><option value="🦊">🦊 Fox</option><option value="🐼">🐼 Panda</option><option value="🐲">🐲 Dragon</option><option value="👑">👑 Royal</option><option value="🦁">🦁 Lion</option><option value="🐸">🐸 Frog</option><option value="🐧">🐧 Penguin</option><option value="🦄">🦄 Unicorn</option><option value="🧛">🧛 Vampire</option><option value="🦸">🦸 Hero</option><option value="⚽">⚽ Football</option><option value="🚀">🚀 Rocket</option><option value="🔥">🔥 Fire</option><option value="💎">💎 Diamond</option><option value="🍕">🍕 Pizza</option></select>
       </div>
       <div class="player-pair">
         <input class="shared-p2" value="Player 2" aria-label="Player 2 name">
-        <select id="tttSkin2"><option value="😎">😎 Cool</option><option value="👻">👻 Ghost</option><option value="🐯">🐯 Tiger</option><option value="🧙">🧙 Wizard</option><option value="👽">👽 Alien</option><option value="🌟">🌟 Star</option></select>
+        <select id="tttSkin2"><option value="😎">😎 Cool</option><option value="👻">👻 Ghost</option><option value="🐯">🐯 Tiger</option><option value="🧙">🧙 Wizard</option><option value="👽">👽 Alien</option><option value="🌟">🌟 Star</option><option value="🐶">🐶 Dog</option><option value="🐱">🐱 Cat</option><option value="🐺">🐺 Wolf</option><option value="🦈">🦈 Shark</option><option value="🦖">🦖 Dinosaur</option><option value="🧟">🧟 Zombie</option><option value="🧚">🧚 Fairy</option><option value="🦹">🦹 Villain</option><option value="🏀">🏀 Basketball</option><option value="⚡">⚡ Lightning</option><option value="🍔">🍔 Burger</option><option value="🎮">🎮 Gamer</option></select>
       </div>
       <select id="tttOpponent"><option value="human" selected>Human vs Human</option><option value="bot">Human vs Bot</option></select>
       <select id="tttDifficulty"><option value="easy">Easy</option><option value="normal">Normal</option><option value="human" selected>Human-like</option><option value="hard">Hard</option><option value="impossible">Impossible</option></select>
@@ -864,7 +1113,7 @@
       <div id="tttScoreP2" class="score-player">😎 Player 2<span class="score-number">0</span></div>
     </div>
     <div id="tttStatus" class="status">Press “Start Tic-Tac-Toe”</div>
-    <div id="tttMessage" class="message">Get three in a row.</div>
+    <div id="tttMessage" class="message">Choose from the included characters. The previous winner goes second.</div>
     <div id="tttBotSpeech" class="bot-speech"></div>
     <div id="tttBoard" class="ttt-board"></div>
     <div class="qol-row">
@@ -872,7 +1121,55 @@
       <button id="tttResetScore" class="ghost-btn">🏆 Reset Tic-Tac-Toe Score</button>
       <button id="tttRulesBtn" class="ghost-btn">📖 Rules</button>
     </div>
-    <div id="tttRules" class="rules-box"><strong>Tic-Tac-Toe:</strong> Take turns placing X and O. The first player to make three in a row wins.</div>
+    <div id="tttRules" class="rules-box"><strong>Tic-Tac-Toe:</strong> Take turns placing your selected character. The first player to make three in a row wins. In the next round, the winner goes last.</div>
+  </section>
+
+<section id="connect4Game" class="game-section">
+    <div class="setup">
+      <div class="player-pair">
+        <input class="shared-p1" value="Player 1" aria-label="Player 1 name">
+        <select id="c4Skin1">
+          <option value="🔴">🔴 Red</option><option value="😀">😀 Smile</option><option value="🥷">🥷 Ninja</option>
+          <option value="🦊">🦊 Fox</option><option value="🔥">🔥 Fire</option><option value="⚽">⚽ Football</option>
+        </select>
+      </div>
+      <div class="player-pair">
+        <input class="shared-p2" value="Player 2" aria-label="Player 2 name">
+        <select id="c4Skin2">
+          <option value="🟡">🟡 Yellow</option><option value="😎">😎 Cool</option><option value="👻">👻 Ghost</option>
+          <option value="🐯">🐯 Tiger</option><option value="⚡">⚡ Lightning</option><option value="🏀">🏀 Basketball</option>
+        </select>
+      </div>
+      <select id="c4Opponent">
+        <option value="human" selected>Human vs Human</option>
+        <option value="bot">Human vs Bot</option>
+      </select>
+      <select id="c4Difficulty">
+        <option value="easy">Easy</option>
+        <option value="normal" selected>Normal</option>
+        <option value="human">Human-like</option>
+        <option value="hard">Hard</option>
+        <option value="impossible">Impossible</option>
+      </select>
+      <button id="c4Start" class="primary">Start Connect Four</button>
+    </div>
+    <div id="c4ScoreHeading" class="score-heading">Connect Four Score</div>
+    <div class="scoreboard">
+      <div id="c4ScoreP1" class="score-player">🔴 Player 1<span class="score-number">0</span></div>
+      <div class="score-vs">VS</div>
+      <div id="c4ScoreP2" class="score-player">🟡 Player 2<span class="score-number">0</span></div>
+    </div>
+    <div id="c4Status" class="status">Press “Start Connect Four”</div>
+    <div id="c4Message" class="message">Drop a piece into a column. First to connect four wins.</div>
+    <div id="c4BotSpeech" class="bot-speech"></div>
+    <div id="c4ColumnButtons" class="connect4-column-buttons"></div>
+    <div id="c4Board" class="connect4-board"></div>
+    <div class="qol-row">
+      <button id="c4Rematch" class="ghost-btn">🔁 Rematch</button>
+      <button id="c4ResetScore" class="ghost-btn">🏆 Reset Connect Four Score</button>
+      <button id="c4RulesBtn" class="ghost-btn">📖 Rules</button>
+    </div>
+    <div id="c4Rules" class="rules-box"><strong>Connect Four:</strong> Choose a column to drop your piece. Pieces fall to the lowest empty space. Connect four horizontally, vertically or diagonally to win.</div>
   </section>
 
 </div>
@@ -926,10 +1223,13 @@
   let scores={
     bomb:{human:[0,0],bot:[0,0]},
     barrier:{human:[0,0],bot:[0,0]},
-    ttt:{human:[0,0],bot:[0,0]}
+    ttt:{human:[0,0],bot:[0,0]},
+    tag:{human:[0,0],bot:[0,0]},
+    connect4:{human:[0,0],bot:[0,0]}
   };
 
   function currentScoreMode(game){
+    if(game==='connect4') return document.getElementById('c4Opponent')?.value==='bot'?'bot':'human';
     const id=game==='bomb'?'bombOpponent':game==='barrier'?'barrierOpponent':'tttOpponent';
     const control=document.getElementById(id);
     return control && control.value==='bot' ? 'bot' : 'human';
@@ -941,7 +1241,7 @@
 
   function allModeTotals(){
     const total=[0,0];
-    for(const game of ['bomb','barrier','ttt']){
+    for(const game of ['bomb','barrier','ttt','connect4']){
       for(const mode of ['human','bot']){
         total[0]+=scores[game][mode][0];
         total[1]+=scores[game][mode][1];
@@ -953,30 +1253,60 @@
   let barrierHistory=[];
   let barrierSnapshots=[];
 
+  let audioContext=null;
+
+  function getAudioContext(){
+    if(!audioContext){
+      const AudioCtx=window.AudioContext||window.webkitAudioContext;
+      if(!AudioCtx)return null;
+      audioContext=new AudioCtx();
+    }
+    if(audioContext.state==='suspended')audioContext.resume().catch(()=>{});
+    return audioContext;
+  }
+
+  function unlockAudio(){
+    if(!soundEnabled)return;
+    const ctx=getAudioContext();
+    if(!ctx)return;
+    const gain=ctx.createGain();
+    gain.gain.value=0.0001;
+    gain.connect(ctx.destination);
+    const osc=ctx.createOscillator();
+    osc.connect(gain);
+    osc.start();
+    osc.stop(ctx.currentTime+0.01);
+  }
+
+  document.addEventListener('pointerdown',unlockAudio,{once:true,capture:true});
+  document.addEventListener('keydown',unlockAudio,{once:true,capture:true});
+
   function beep(type='move'){
-    if(!soundEnabled) return;
+    if(!soundEnabled)return;
     try{
-      const ctx=new (window.AudioContext||window.webkitAudioContext)();
+      const ctx=getAudioContext();
+      if(!ctx)return;
       const osc=ctx.createOscillator();
       const gain=ctx.createGain();
       osc.connect(gain);
       gain.connect(ctx.destination);
-
       const map={
-        move:[440,.08],
-        safe:[620,.12],
-        bomb:[120,.35],
-        win:[780,.22],
-        wall:[260,.10]
+        move:[440,.09,'sine'],
+        safe:[620,.14,'triangle'],
+        bomb:[120,.38,'sawtooth'],
+        win:[780,.28,'square'],
+        wall:[260,.12,'triangle']
       };
-      const [freq,duration]=map[type]||map.move;
-      osc.frequency.value=freq;
-      gain.gain.setValueAtTime(.07,ctx.currentTime);
+      const [freq,duration,wave]=map[type]||map.move;
+      osc.type=wave;
+      osc.frequency.setValueAtTime(freq,ctx.currentTime);
+      gain.gain.setValueAtTime(.12,ctx.currentTime);
       gain.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+duration);
-      osc.start();
+      osc.start(ctx.currentTime);
       osc.stop(ctx.currentTime+duration);
-      osc.onended=()=>ctx.close();
-    }catch(e){}
+    }catch(e){
+      console.warn('Audio unavailable',e);
+    }
   }
 
   function scoreName(game,player){
@@ -985,7 +1315,7 @@
   }
 
   function renderScores(){
-    for(const game of ['bomb','barrier','ttt']){
+    for(const game of ['bomb','barrier','ttt','connect4']){
       if(!scores[game]) scores[game]={human:[0,0],bot:[0,0]};
       if(!scores[game].human) scores[game].human=[0,0];
       if(!scores[game].bot) scores[game].bot=[0,0];
@@ -1024,6 +1354,15 @@
     if(document.getElementById('tttScoreP1')){
       document.getElementById('tttScoreP1').innerHTML=`${tttNames[0]}<span class="score-number">${tttScore[0]}</span>`;
       document.getElementById('tttScoreP2').innerHTML=`${tttNames[1]}<span class="score-number">${tttScore[1]}</span>`;
+    }
+    if(document.getElementById('c4ScoreP1')){
+      const mode=currentScoreMode('connect4');
+      const c4Score=scores.connect4[mode];
+      const p1=document.getElementById('c4Skin1')?.value||'🔴';
+      const p2=mode==='bot'?'🤖':(document.getElementById('c4Skin2')?.value||'🟡');
+      document.getElementById('c4ScoreHeading').textContent=`Connect Four · ${mode==='bot'?'Human vs Bot':'Human vs Human'}`;
+      document.getElementById('c4ScoreP1').innerHTML=`${p1} ${sharedNames[0]}<span class="score-number">${c4Score[0]}</span>`;
+      document.getElementById('c4ScoreP2').innerHTML=`${p2} ${mode==='bot'?'Bot':(savedHumanPlayer2Name||sharedNames[1])}<span class="score-number">${c4Score[1]}</span>`;
     }
 
     const totals=allModeTotals();
@@ -1095,7 +1434,8 @@
         scores={
           bomb:migrate(saved.bomb),
           barrier:migrate(saved.barrier),
-          ttt:migrate(saved.ttt||[0,0])
+          ttt:migrate(saved.ttt||[0,0]),
+          connect4:migrate(saved.connect4||[0,0])
         };
       }
     }catch(e){}
@@ -2351,7 +2691,7 @@
   });
 
   document.getElementById('resetScoresBtn').addEventListener('click',()=>{
-    scores={bomb:{human:[0,0],bot:[0,0]},barrier:{human:[0,0],bot:[0,0]},ttt:{human:[0,0],bot:[0,0]}};
+    scores={bomb:{human:[0,0],bot:[0,0]},barrier:{human:[0,0],bot:[0,0]},ttt:{human:[0,0],bot:[0,0]},connect4:{human:[0,0],bot:[0,0]}};
     saveScores();
     renderScores();
     bombMessage.textContent='All scores reset.';
@@ -2379,6 +2719,9 @@
     }
     if(e.key==='3'){
       document.querySelector('[data-tab="ticTacToeGame"]').click();
+    }
+    if(e.key==='4'){
+      document.querySelector('[data-tab="connect4Game"]').click();
     }
   });
 
@@ -2457,8 +2800,12 @@
   const tttStatus=document.getElementById('tttStatus');
   const tttMessage=document.getElementById('tttMessage');
   const tttBotSpeech=document.getElementById('tttBotSpeech');
-  let tttBoard=Array(9).fill(''),tttCurrent=0,tttPlayers=['Player 1','Player 2'],tttVsBot=false,tttActive=false,tttBotBusy=false;
+  let tttBoard=Array(9).fill(''),tttCurrent=0,tttPlayers=['Player 1','Player 2'],tttPieces=['😀','😎'],tttVsBot=false,tttActive=false,tttBotBusy=false,tttNextStarter=0;
   const tttWins=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+
+  function selectedPiece(selectId){
+    return document.getElementById(selectId).value;
+  }
 
   function tttWinner(board){
     for(const line of tttWins){const[a,b,c]=line;if(board[a]&&board[a]===board[b]&&board[a]===board[c])return{symbol:board[a],line};}
@@ -2470,44 +2817,61 @@
     tttBoard.forEach((value,index)=>{
       const cell=document.createElement('button');
       cell.className='ttt-cell';
-      if(value){cell.textContent=value;cell.classList.add(value==='X'?'x':'o');}
+      if(value){
+        const playerIndex=value==='A'?0:1;
+        cell.textContent=tttPieces[playerIndex];
+        cell.classList.add(playerIndex===0?'x':'o');
+      }
       cell.disabled=!tttActive||Boolean(value)||(tttVsBot&&tttCurrent===1);
       cell.addEventListener('click',()=>playTtt(index,false));
       tttBoardEl.appendChild(cell);
     });
   }
 
-  function startTtt(){
+  function startTtt(useNextStarter=false){
     syncSharedNames(document.getElementById('ticTacToeGame'));
     tttVsBot=document.getElementById('tttOpponent').value==='bot';
-    sharedSkins[0]=document.getElementById('tttSkin1').value;
-    sharedSkins[1]=document.getElementById('tttSkin2').value;
-    tttPlayers=[`${sharedSkins[0]} ${sharedNames[0]}`,tttVsBot?'🤖 Bot':`${sharedSkins[1]} ${sharedNames[1]}`];
-    tttBoard=Array(9).fill('');tttCurrent=0;tttActive=true;tttBotBusy=false;
+    tttPieces=[selectedPiece('tttSkin1'),selectedPiece('tttSkin2')];
+    sharedSkins[0]=tttPieces[0];
+    if(!tttVsBot)sharedSkins[1]=tttPieces[1];
+    tttPlayers=[`${tttPieces[0]} ${sharedNames[0]}`,tttVsBot?'🤖 Bot':`${tttPieces[1]} ${sharedNames[1]}`];
+    tttBoard=Array(9).fill('');
+    tttCurrent=useNextStarter?tttNextStarter:0;
+    tttActive=true;tttBotBusy=false;
     tttBotSpeech.classList.remove('show');
-    tttStatus.textContent=`${tttPlayers[0]}'s turn`;tttMessage.textContent='Place an X.';
+    tttStatus.textContent=`${tttPlayers[tttCurrent]}'s turn`;
+    tttMessage.textContent=`Place ${tttCurrent===0?tttPieces[0]:(tttVsBot?'🤖':tttPieces[1])}.`;
     renderScores();renderTtt();
+    if(tttVsBot&&tttCurrent===1)runTttBot();
   }
 
   function finishTtt(result){
     tttActive=false;tttBotBusy=false;tttBotSpeech.classList.remove('show');
     if(result){
-      const winnerIndex=result.symbol==='X'?0:1;
+      const winnerIndex=result.symbol==='A'?0:1;
       gameScore('ttt')[winnerIndex]++;saveScores();renderScores();
-      tttStatus.textContent=`${tttPlayers[winnerIndex]} wins!`;tttMessage.textContent='Three in a row.';beep('win');
+      tttNextStarter=1-winnerIndex;
+      tttStatus.textContent=`${tttPlayers[winnerIndex]} wins!`;
+      tttMessage.textContent=`Next round: ${tttPlayers[winnerIndex]} goes last.`;
+      beep('win');
       [...tttBoardEl.children].forEach((cell,i)=>{cell.disabled=true;if(result.line.includes(i))cell.classList.add('win');});
-    }else{tttStatus.textContent='Draw!';tttMessage.textContent='No spaces left.';renderTtt();}
+    }else{
+      tttNextStarter=1-tttCurrent;
+      tttStatus.textContent='Draw!';
+      tttMessage.textContent='No spaces left. The next starting player changes.';
+      renderTtt();
+    }
   }
 
   function playTtt(index,fromBot){
     if(!tttActive||tttBoard[index]||(tttVsBot&&tttCurrent===1&&!fromBot))return;
-    tttBoard[index]=tttCurrent===0?'X':'O';beep('move');renderTtt();
+    tttBoard[index]=tttCurrent===0?'A':'B';beep('move');renderTtt();
     const result=tttWinner(tttBoard);
     if(result){finishTtt(result);return;}
     if(tttBoard.every(Boolean)){finishTtt(null);return;}
     tttCurrent=1-tttCurrent;
     tttStatus.textContent=`${tttPlayers[tttCurrent]}'s turn`;
-    tttMessage.textContent=tttCurrent===0?'Place an X.':'Place an O.';
+    tttMessage.textContent=`Place ${tttCurrent===0?tttPieces[0]:(tttVsBot?'🤖':tttPieces[1])}.`;
     if(tttVsBot&&tttCurrent===1)runTttBot();else renderTtt();
   }
 
@@ -2517,13 +2881,13 @@
     return null;
   }
   function minimax(board,maximizing){
-    const win=tttWinner(board);if(win)return win.symbol==='O'?10:-10;if(board.every(Boolean))return 0;
-    const vals=[];for(const i of board.map((v,i)=>v?'':i).filter(v=>v!=='')){board[i]=maximizing?'O':'X';vals.push(minimax(board,!maximizing));board[i]='';}
+    const win=tttWinner(board);if(win)return win.symbol==='B'?10:-10;if(board.every(Boolean))return 0;
+    const vals=[];for(const i of board.map((v,i)=>v?'':i).filter(v=>v!=='')){board[i]=maximizing?'B':'A';vals.push(minimax(board,!maximizing));board[i]='';}
     return maximizing?Math.max(...vals):Math.min(...vals);
   }
   function impossibleTttMove(){
     let best=-Infinity,move=null;
-    for(const i of tttBoard.map((v,i)=>v?'':i).filter(v=>v!=='')){tttBoard[i]='O';const score=minimax(tttBoard,false);tttBoard[i]='';if(score>best){best=score;move=i;}}
+    for(const i of tttBoard.map((v,i)=>v?'':i).filter(v=>v!=='')){tttBoard[i]='B';const score=minimax(tttBoard,false);tttBoard[i]='';if(score>best){best=score;move=i;}}
     return move;
   }
 
@@ -2532,27 +2896,239 @@
     const d=document.getElementById('tttDifficulty').value;
     const lines={easy:['Maybe this square.'],normal:['I should check the lines.'],human:['I am thinking ahead.'],hard:['I see the strongest move.'],impossible:['This board is solved.']};
     tttBotSpeech.textContent=`🤖 ${lines[d][0]}`;tttBotSpeech.classList.add('show');
-    const delay=d==='human'?1500:d==='normal'?1000:d==='hard'?850:d==='impossible'?650:700;
+    const delay=d==='human'?1100:d==='normal'?800:d==='hard'?650:d==='impossible'?450:600;
     setTimeout(()=>{
-      const win=winningTttMove(tttBoard,'O'),block=winningTttMove(tttBoard,'X');
+      const win=winningTttMove(tttBoard,'B'),block=winningTttMove(tttBoard,'A');
       let move;
       if(d==='easy')move=randomEmpty(tttBoard);
       else if(d==='normal')move=win??(Math.random()<.7?block:null)??randomEmpty(tttBoard);
-      else if(d==='human'){move=win??block; if(move===null){const p=[4,0,2,6,8,1,3,5,7].filter(i=>!tttBoard[i]);move=Math.random()<.82?p[0]:randomEmpty(tttBoard);}}
+      else if(d==='human'){move=win??block;if(move===null){const p=[4,0,2,6,8,1,3,5,7].filter(i=>!tttBoard[i]);move=Math.random()<.82?p[0]:randomEmpty(tttBoard);}}
       else if(d==='hard')move=win??block??impossibleTttMove();
       else move=impossibleTttMove();
       tttBotBusy=false;tttBotSpeech.classList.remove('show');playTtt(move,true);
     },delay);
   }
 
-  document.getElementById('tttStart').addEventListener('click',startTtt);
-  document.getElementById('tttRematch').addEventListener('click',startTtt);
+  document.getElementById('tttStart').addEventListener('click',()=>startTtt(false));
+  document.getElementById('tttRematch').addEventListener('click',()=>startTtt(true));
   document.getElementById('tttRulesBtn').addEventListener('click',()=>document.getElementById('tttRules').classList.toggle('show'));
   document.getElementById('tttOpponent').addEventListener('change',()=>{
     updateOpponentControls();
     refreshScoreDisplays();
   });
   renderTtt();
+
+  /* Connect Four */
+  const c4BoardEl=document.getElementById('c4Board');
+  const c4ButtonsEl=document.getElementById('c4ColumnButtons');
+  const c4Status=document.getElementById('c4Status');
+  const c4Message=document.getElementById('c4Message');
+  const c4BotSpeech=document.getElementById('c4BotSpeech');
+  let c4Board=Array.from({length:6},()=>Array(7).fill(0));
+  let c4Current=1,c4Active=false,c4VsBot=false,c4BotBusy=false;
+  let c4Pieces=['🔴','🟡'],c4Names=['Player 1','Player 2'];
+
+  function c4Talk(event='move'){
+    if(!c4VsBot)return;
+    const d=document.getElementById('c4Difficulty').value;
+    const lines={
+      easy:{start:['I hope I pick a good column!'],move:['This column looks fun.','I forgot my plan.'],win:['Wait... I won?']},
+      normal:{start:['I will watch for three in a row.'],move:['I am checking the open lines.','I should block that soon.'],win:['Four connected!']},
+      human:{start:['I will try not to make it obvious.'],move:['I nearly chose another column.','You made me rethink that move.'],win:['That was closer than it looked.']},
+      hard:{start:['I am planning several moves ahead.'],move:['That threat is handled.','I am building two chances at once.'],win:['The winning line was prepared.']},
+      impossible:{start:['Perfect Connect Four strategy online.'],move:['Every response has been evaluated.','Your losing branch is selected.'],win:['Optimal play complete.']}
+    };
+    const pool=lines[d][event]||lines[d].move;
+    c4BotSpeech.textContent=`🤖 Bot: ${pool[Math.floor(Math.random()*pool.length)]}`;
+    c4BotSpeech.classList.add('show');
+  }
+
+  function c4ValidColumns(board=c4Board){
+    return [...Array(7).keys()].filter(c=>board[0][c]===0);
+  }
+
+  function c4Drop(board,col,player){
+    for(let r=5;r>=0;r--)if(board[r][col]===0){board[r][col]=player;return r;}
+    return -1;
+  }
+
+  function c4Winner(board=c4Board){
+    const dirs=[[0,1],[1,0],[1,1],[1,-1]];
+    for(let r=0;r<6;r++)for(let c=0;c<7;c++){
+      const p=board[r][c];if(!p)continue;
+      for(const[dr,dc]of dirs){
+        const line=[];
+        for(let k=0;k<4;k++){
+          const rr=r+dr*k,cc=c+dc*k;
+          if(rr<0||rr>=6||cc<0||cc>=7||board[rr][cc]!==p)break;
+          line.push([rr,cc]);
+        }
+        if(line.length===4)return{player:p,line};
+      }
+    }
+    return null;
+  }
+
+  function renderC4(){
+    c4BoardEl.innerHTML='';
+    for(let r=0;r<6;r++)for(let c=0;c<7;c++){
+      const cell=document.createElement('button');
+      cell.className='connect4-cell';
+      if(c4Board[r][c]){
+        const p=c4Board[r][c]-1;
+        cell.classList.add(p===0?'p1':'p2');
+        cell.textContent=c4Pieces[p];
+      }
+      cell.addEventListener('click',()=>playC4(c,false));
+      c4BoardEl.appendChild(cell);
+    }
+    c4ButtonsEl.innerHTML='';
+    for(let c=0;c<7;c++){
+      const b=document.createElement('button');
+      b.textContent=`▼ ${c+1}`;
+      b.disabled=!c4Active||c4Board[0][c]!==0||(c4VsBot&&c4Current===2);
+      b.addEventListener('click',()=>playC4(c,false));
+      c4ButtonsEl.appendChild(b);
+    }
+  }
+
+  function startC4(){
+    syncSharedNames(document.getElementById('connect4Game'));
+    c4VsBot=document.getElementById('c4Opponent').value==='bot';
+    c4Pieces=[document.getElementById('c4Skin1').value,c4VsBot?'🤖':document.getElementById('c4Skin2').value];
+    c4Names=[sharedNames[0],c4VsBot?'Bot':sharedNames[1]];
+    c4Board=Array.from({length:6},()=>Array(7).fill(0));
+    c4Current=1;c4Active=true;c4BotBusy=false;
+    c4Status.textContent=`${c4Pieces[0]} ${c4Names[0]}'s turn`;
+    c4Message.textContent='Choose a column.';
+    c4BotSpeech.classList.remove('show');
+    renderC4();renderScores();
+    if(c4VsBot)c4Talk('start');
+  }
+
+  function finishC4(result){
+    c4Active=false;c4BotBusy=false;
+    if(result){
+      const index=result.player-1;
+      gameScore('connect4')[index]++;saveScores();renderScores();
+      c4Status.textContent=`${c4Pieces[index]} ${c4Names[index]} wins!`;
+      c4Message.textContent='Four connected!';
+      if(index===1)c4Talk('win');
+      renderC4();
+      result.line.forEach(([r,c])=>c4BoardEl.children[r*7+c].classList.add('win'));
+      beep('win');
+    }else{
+      c4Status.textContent='Draw!';
+      c4Message.textContent='The board is full.';
+      renderC4();
+    }
+  }
+
+  function playC4(col,fromBot){
+    if(!c4Active||c4Board[0][col]!==0||(c4VsBot&&c4Current===2&&!fromBot))return;
+    c4Drop(c4Board,col,c4Current);
+    beep('move');renderC4();
+    const win=c4Winner();
+    if(win){finishC4(win);return;}
+    if(c4ValidColumns().length===0){finishC4(null);return;}
+    c4Current=c4Current===1?2:1;
+    c4Status.textContent=`${c4Pieces[c4Current-1]} ${c4Names[c4Current-1]}'s turn`;
+    if(c4VsBot&&c4Current===2)runC4Bot();
+  }
+
+  function c4ImmediateMove(player){
+    for(const col of c4ValidColumns()){
+      const copy=c4Board.map(r=>[...r]);c4Drop(copy,col,player);
+      if(c4Winner(copy)?.player===player)return col;
+    }
+    return null;
+  }
+
+  function c4ScorePosition(board,player){
+    let score=0;
+    for(let r=0;r<6;r++)if(board[r][3]===player)score+=5;
+    const windows=[];
+    for(let r=0;r<6;r++)for(let c=0;c<4;c++)windows.push([board[r][c],board[r][c+1],board[r][c+2],board[r][c+3]]);
+    for(let c=0;c<7;c++)for(let r=0;r<3;r++)windows.push([board[r][c],board[r+1][c],board[r+2][c],board[r+3][c]]);
+    for(let r=0;r<3;r++)for(let c=0;c<4;c++)windows.push([board[r][c],board[r+1][c+1],board[r+2][c+2],board[r+3][c+3]]);
+    for(let r=0;r<3;r++)for(let c=3;c<7;c++)windows.push([board[r][c],board[r+1][c-1],board[r+2][c-2],board[r+3][c-3]]);
+    for(const w of windows){
+      const own=w.filter(x=>x===player).length,empty=w.filter(x=>x===0).length,opp=w.filter(x=>x&&x!==player).length;
+      if(own===4)score+=100000;
+      else if(own===3&&empty===1)score+=120;
+      else if(own===2&&empty===2)score+=18;
+      if(opp===3&&empty===1)score-=140;
+    }
+    return score;
+  }
+
+  function c4Minimax(board,depth,maximizing,alpha=-Infinity,beta=Infinity){
+    const win=c4Winner(board);
+    if(win)return win.player===2?1000000+depth:-1000000-depth;
+    const valid=c4ValidColumns(board);
+    if(depth===0||!valid.length)return c4ScorePosition(board,2);
+    if(maximizing){
+      let value=-Infinity;
+      for(const col of valid){
+        const copy=board.map(r=>[...r]);c4Drop(copy,col,2);
+        value=Math.max(value,c4Minimax(copy,depth-1,false,alpha,beta));
+        alpha=Math.max(alpha,value);if(alpha>=beta)break;
+      }
+      return value;
+    }
+    let value=Infinity;
+    for(const col of valid){
+      const copy=board.map(r=>[...r]);c4Drop(copy,col,1);
+      value=Math.min(value,c4Minimax(copy,depth-1,true,alpha,beta));
+      beta=Math.min(beta,value);if(alpha>=beta)break;
+    }
+    return value;
+  }
+
+  function chooseC4BotMove(){
+    const d=document.getElementById('c4Difficulty').value;
+    const valid=c4ValidColumns();
+    const win=c4ImmediateMove(2),block=c4ImmediateMove(1);
+    if(d==='easy')return valid[Math.floor(Math.random()*valid.length)];
+    if(win!==null)return win;
+    if(d==='normal')return (Math.random()<.75?block:null)??valid[Math.floor(Math.random()*valid.length)];
+    if(d==='human'&&Math.random()<.18)return valid[Math.floor(Math.random()*valid.length)];
+    if(block!==null&&d!=='human')return block;
+    const depth={human:3,hard:4,impossible:5}[d]||3;
+    const scored=valid.map(col=>{
+      const copy=c4Board.map(r=>[...r]);c4Drop(copy,col,2);
+      return{col,score:c4Minimax(copy,depth-1,false)};
+    }).sort((a,b)=>b.score-a.score);
+    if(d==='human'&&scored.length>1&&Math.random()<.35)return scored[1].col;
+    return scored[0].col;
+  }
+
+  function runC4Bot(){
+    if(c4BotBusy||!c4Active)return;
+    c4BotBusy=true;c4Talk('move');renderC4();
+    const d=document.getElementById('c4Difficulty').value;
+    const delay={easy:650,normal:800,human:1150,hard:700,impossible:520}[d]||800;
+    setTimeout(()=>{
+      const col=chooseC4BotMove();
+      c4BotBusy=false;
+      playC4(col,true);
+    },delay);
+  }
+
+  document.getElementById('c4Start').addEventListener('click',startC4);
+  document.getElementById('c4Rematch').addEventListener('click',startC4);
+  document.getElementById('c4RulesBtn').addEventListener('click',()=>document.getElementById('c4Rules').classList.toggle('show'));
+  document.getElementById('c4Opponent').addEventListener('change',()=>{
+    document.getElementById('c4Difficulty').disabled=document.getElementById('c4Opponent').value!=='bot';
+    refreshScoreDisplays();
+  });
+  document.getElementById('c4ResetScore').addEventListener('click',()=>{
+    const mode=currentScoreMode('connect4');
+    scores.connect4[mode]=[0,0];saveScores();renderScores();
+    c4Message.textContent='Connect Four score reset.';
+  });
+  renderC4();
+
 
   window.addEventListener('resize',()=>{if(document.getElementById('barrierGame').classList.contains('active'))renderBoard();});
 
@@ -2562,7 +3138,7 @@
   renderBoard();
 })();
 </script>
-<div class="site-label">offlinepartygames.html</div>
+<div class="site-label"><a href="https://ascendedpumpkingaming.github.io/offlinepartygames/" target="_blank" rel="noopener">https://ascendedpumpkingaming.github.io/offlinepartygames/</a></div>
 <div class="corner-credit">
   <strong>Sub to Ascended Pumpkin Gaming</strong><br>
   Made by Shabdmeet Insan
