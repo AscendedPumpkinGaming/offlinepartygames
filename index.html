@@ -1,0 +1,2571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Offline Party Games</title>
+<style>
+  :root{
+    --bg:#111;
+    --panel:#252525;
+    --panel2:#333;
+    --text:#fff;
+    --muted:#ccc;
+    --accent:#ffd21f;
+    --safe:#2dbd72;
+    --danger:#e33c3c;
+    --blue:#4ca3ff;
+    --orange:#ff9d3f;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    min-height:100vh;
+    font-family:Arial,Helvetica,sans-serif;
+    background:linear-gradient(145deg,#0b1220 0%,#111827 45%,#0f172a 100%);
+    color:var(--text);
+    padding:18px;
+  }
+  .app{
+    width:min(1000px,100%);
+    margin:auto;
+    background:linear-gradient(180deg,rgba(31,41,55,.98),rgba(17,24,39,.98));
+    border:1px solid rgba(255,255,255,.12);
+    border-radius:24px;
+    padding:22px;
+    box-shadow:0 24px 70px rgba(0,0,0,.45);
+  }
+  h1,h2,h3{margin-top:0}
+  h1{text-align:center;font-size:clamp(2rem,5vw,3.6rem);margin-bottom:8px}
+  .subtitle{text-align:center;color:var(--muted);margin-bottom:18px}
+  .tabs{
+    display:flex;
+    justify-content:center;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-bottom:18px;
+  }
+  .tab-btn,.primary,.secondary{
+    border:0;
+    border-radius:12px;
+    padding:12px 16px;
+    font:inherit;
+    font-weight:800;
+    cursor:pointer;
+  }
+  .tab-btn{background:#444;color:#fff}
+  .tab-btn.active{background:var(--accent);color:#111}
+  .primary{background:var(--accent);color:#111}
+  .secondary{background:#efefef;color:#111}
+  .game-section{display:none}
+  .game-section.active{display:block}
+  .setup{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    justify-content:center;
+    margin-bottom:16px;
+  }
+  .player-pair{
+    display:flex;
+    gap:6px;
+    align-items:center;
+    flex-wrap:nowrap;
+  }
+  .player-pair input{min-width:150px}
+  .player-pair select{min-width:115px}
+  input,select{
+    font:inherit;
+    border-radius:12px;
+    padding:11px 13px;
+    border:1px solid #666;
+    background:#f7f7f7;
+    color:#111;
+    min-width:145px;
+  }
+  .status{
+    text-align:center;
+    font-size:clamp(1.2rem,3vw,1.9rem);
+    font-weight:800;
+    margin:12px 0 6px;
+  }
+  .message{
+    text-align:center;
+    color:var(--muted);
+    min-height:28px;
+    margin-bottom:14px;
+  }
+
+  /* Bomb chips */
+  .chips{
+    width:min(650px,100%);
+    margin:18px auto 8px;
+    display:grid;
+    gap:16px;
+    justify-content:center;
+  }
+  .count-9{grid-template-columns:repeat(3,minmax(82px,122px))}
+  .count-12{grid-template-columns:repeat(4,minmax(72px,108px))}
+  .count-16{grid-template-columns:repeat(4,minmax(68px,98px))}
+  .count-20{grid-template-columns:repeat(5,minmax(60px,86px))}
+  .chip{
+    position:relative;
+    aspect-ratio:1.15/1;
+    border-radius:50% 48% 52% 46%;
+    border:2px solid #d5a42a;
+    background:
+      radial-gradient(circle at 38% 28%,rgba(255,255,255,.7) 0 7%,transparent 8%),
+      radial-gradient(circle at 65% 67%,rgba(120,70,0,.18) 0 6%,transparent 7%),
+      radial-gradient(circle at 48% 50%,#ffe98a 0%,#f1c84d 46%,#c9941d 75%,#8f5d0b 100%);
+    box-shadow:
+      inset 0 2px 6px rgba(255,255,255,.45),
+      inset 0 -6px 10px rgba(90,45,0,.25),
+      0 7px 14px rgba(0,0,0,.35);
+    color:#4b3104;
+    display:grid;
+    place-items:center;
+    font-size:clamp(1.2rem,3vw,1.9rem);
+    transition:transform .12s ease,filter .12s ease;
+    user-select:none;
+    overflow:hidden;
+  }
+  .chip:nth-child(odd){transform:rotate(-3deg)}
+  .chip:nth-child(even){transform:rotate(3deg)}
+  .chip::after{
+    content:"";
+    position:absolute;
+    width:70%;
+    height:10%;
+    border-radius:50%;
+    background:rgba(120,65,0,.15);
+    top:18%;
+    left:15%;
+    transform:rotate(-8deg);
+  }
+  .chip:hover:not(:disabled){filter:brightness(1.08);transform:translateY(-2px) scale(1.03)}
+  .chip.safe{
+    border-color:#5edb97;
+    background:radial-gradient(circle at 45% 35%,#bcffd7 0%,#43d788 40%,#149753 75%,#08622f 100%);
+    color:#fff;
+  }
+  .chip.bomb{
+    border-color:#ff7777;
+    background:radial-gradient(circle at 45% 35%,#ffc4c4 0%,#f24f4f 40%,#b71919 75%,#650000 100%);
+    color:#fff;
+  }
+  .chip.reveal-p1{outline:4px solid var(--blue)}
+  .chip.reveal-p2{outline:4px solid var(--orange)}
+  .chip.reveal-both{
+    outline:4px solid #fff;
+    box-shadow:0 0 0 7px var(--blue),0 0 0 11px var(--orange),0 7px 14px rgba(0,0,0,.35);
+  }
+  .legend{
+    display:flex;
+    justify-content:center;
+    gap:16px;
+    flex-wrap:wrap;
+    color:var(--muted);
+    font-size:.95rem;
+    margin-top:14px;
+  }
+  .dot{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:6px}
+  .dot.blue{background:var(--blue)}
+  .dot.orange{background:var(--orange)}
+
+  /* Barrier duel */
+  .barrier-wrap{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) 260px;
+    gap:18px;
+    align-items:start;
+  }
+  .board{
+    --size:7;
+    display:grid;
+    grid-template-columns:repeat(var(--size),1fr);
+    gap:4px;
+    width:min(640px,100%);
+    margin:auto;
+    background:#161616;
+    padding:8px;
+    border-radius:16px;
+    border:2px solid #4a4a4a;
+  }
+  .cell{
+    aspect-ratio:1;
+    border-radius:8px;
+    background:#e8e8e8;
+    color:#111;
+    display:grid;
+    place-items:center;
+    font-weight:900;
+    cursor:pointer;
+    position:relative;
+  }
+  .cell:hover{filter:brightness(.92)}
+  .cell.p1{background:var(--blue);color:#fff}
+  .cell.p2{background:var(--orange);color:#fff}
+  .cell.barrier{background:#4b4b4b;color:#fff;cursor:default}
+  .cell.target1::after,.cell.target2::after{
+    content:"";
+    position:absolute;
+    inset:16%;
+    border:3px dashed rgba(255,255,255,.8);
+    border-radius:8px;
+  }
+  .side-panel{
+    background:#1c1c1c;
+    border:1px solid #444;
+    border-radius:16px;
+    padding:16px;
+  }
+  .mode-box{
+    background:#2c2c2c;
+    border-radius:12px;
+    padding:12px;
+    margin-bottom:12px;
+    color:#ddd;
+  }
+  .action-buttons{
+    display:grid;
+    gap:10px;
+  }
+  .action-buttons button{
+    border:0;
+    border-radius:10px;
+    padding:11px;
+    font-weight:800;
+    cursor:pointer;
+  }
+  .move-btn{background:#dfefff;color:#111}
+  .barrier-btn{background:#555;color:#fff}
+  .selected-action{outline:3px solid var(--accent)}
+  .small{text-align:center;margin-top:18px;color:#bbb;font-size:.92rem}
+  .qol-row{
+    display:flex;
+    justify-content:center;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-top:14px;
+  }
+  .ghost-btn{
+    background:#444;
+    color:#fff;
+    border:1px solid #666;
+    border-radius:10px;
+    padding:10px 14px;
+    font-weight:800;
+    cursor:pointer;
+  }
+  .rules-box{
+    display:none;
+    max-width:760px;
+    margin:14px auto 0;
+    background:#1b1b1b;
+    border:1px solid #444;
+    border-radius:14px;
+    padding:14px;
+    color:#ddd;
+    text-align:left;
+  }
+  .rules-box.show{display:block}
+  .hidden-control{display:none!important}
+  .turn-badge{
+    display:inline-block;
+    margin-left:8px;
+    padding:3px 8px;
+    border-radius:999px;
+    background:#555;
+    font-size:.8rem;
+    vertical-align:middle;
+  }
+  .bot-speech{
+    max-width:620px;
+    margin:10px auto 14px;
+    background:#f4f4f4;
+    color:#111;
+    border-radius:18px;
+    padding:12px 16px;
+    font-weight:700;
+    position:relative;
+    display:none;
+  }
+  .bot-speech.show{display:block}
+  .bot-speech::after{
+    content:"";
+    position:absolute;
+    left:28px;
+    bottom:-10px;
+    border-width:10px 10px 0;
+    border-style:solid;
+    border-color:#f4f4f4 transparent transparent;
+  }
+  .top-tools{
+    display:flex;
+    justify-content:center;
+    gap:8px;
+    flex-wrap:wrap;
+    margin:0 0 16px;
+  }
+  .tool-toggle{
+    background:#3c3c3c;
+    color:#fff;
+    border:1px solid #666;
+    border-radius:999px;
+    padding:8px 12px;
+    font-weight:700;
+    cursor:pointer;
+  }
+  .tool-toggle.on{
+    background:#176d43;
+    border-color:#42d98a;
+  }
+  .scoreboard{
+    max-width:700px;
+    margin:10px auto 16px;
+    display:grid;
+    grid-template-columns:1fr auto 1fr;
+    gap:10px;
+    align-items:center;
+    background:#1b1b1b;
+    border:1px solid #444;
+    border-radius:16px;
+    padding:12px;
+  }
+  .score-player{
+    text-align:center;
+    font-weight:800;
+  }
+  .score-number{
+    display:block;
+    font-size:1.7rem;
+    color:var(--accent);
+  }
+  .score-vs{
+    color:#aaa;
+    font-weight:900;
+  }
+  .active-player{
+    box-shadow:0 0 0 3px var(--accent);
+  }
+  body.no-animations *{
+    transition:none!important;
+    animation:none!important;
+  }
+  .compact .setup{
+    margin-bottom:8px;
+  }
+  .compact .subtitle,
+  .compact .small{
+    display:none;
+  }
+  .disabled-player{
+    opacity:.5;
+    pointer-events:none;
+  }
+  .keybind-bar{
+    display:flex;
+    justify-content:center;
+    gap:12px;
+    flex-wrap:wrap;
+    margin:0 auto 16px;
+    color:#ddd;
+    font-size:.92rem;
+  }
+  .keybind-bar span{
+    background:#1b1b1b;
+    border:1px solid #444;
+    border-radius:10px;
+    padding:7px 10px;
+  }
+  kbd{
+    display:inline-block;
+    min-width:28px;
+    text-align:center;
+    margin-right:5px;
+    padding:3px 7px;
+    border-radius:6px;
+    background:#f2f2f2;
+    color:#111;
+    box-shadow:0 2px 0 #999;
+    font-weight:900;
+  }
+  .quick-presets{
+    display:flex;
+    justify-content:center;
+    gap:8px;
+    flex-wrap:wrap;
+    margin:10px 0 14px;
+  }
+  .preset-btn{
+    background:#353535;
+    color:#fff;
+    border:1px solid #5b5b5b;
+    border-radius:10px;
+    padding:9px 12px;
+    cursor:pointer;
+    font-weight:800;
+  }
+  .history-box{
+    max-width:760px;
+    margin:12px auto 0;
+    background:#191919;
+    border:1px solid #444;
+    border-radius:14px;
+    padding:12px;
+    color:#d8d8d8;
+    text-align:left;
+    max-height:150px;
+    overflow:auto;
+  }
+  .history-box strong{color:#fff}
+  .history-list{
+    margin:8px 0 0;
+    padding-left:20px;
+  }
+  .mode-label{
+    display:inline-block;
+    margin-left:6px;
+    padding:3px 7px;
+    border-radius:999px;
+    background:#555;
+    color:#fff;
+    font-size:.78rem;
+    font-weight:800;
+  }
+  .undo-btn:disabled{
+    opacity:.45;
+    cursor:not-allowed;
+  }
+  body.fake-fullscreen{
+    padding:0;
+    overflow:auto;
+    background:#111;
+  }
+  body.fake-fullscreen .app{
+    width:100%;
+    min-height:100vh;
+    max-width:none;
+    border-radius:0;
+    border:0;
+    margin:0;
+    box-shadow:none;
+  }
+  .corner-credit{
+    position:fixed;
+    right:12px;
+    bottom:10px;
+    z-index:50;
+    background:rgba(0,0,0,.72);
+    color:#fff;
+    border:1px solid rgba(255,255,255,.22);
+    border-radius:10px;
+    padding:8px 11px;
+    font-size:.82rem;
+    line-height:1.3;
+    text-align:right;
+    backdrop-filter:blur(5px);
+    box-shadow:0 4px 16px rgba(0,0,0,.35);
+  }
+  .corner-credit strong{
+    color:var(--accent);
+  }
+
+  .overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.93);
+    display:none;
+    place-items:center;
+    padding:20px;
+    z-index:20;
+  }
+  .overlay.show{display:grid}
+  .card{
+    width:min(540px,100%);
+    background:#fff;
+    color:#111;
+    border-radius:22px;
+    padding:30px;
+    box-shadow:0 20px 60px rgba(0,0,0,.45);
+    text-align:center;
+  }
+  .card h2{font-size:2rem}
+  @media(max-width:760px){
+    .barrier-wrap{grid-template-columns:1fr}
+    .side-panel{width:min(640px,100%);margin:auto}
+  }
+  @media(max-width:650px){
+    .count-12{grid-template-columns:repeat(3,minmax(72px,100px))}
+    .count-16{grid-template-columns:repeat(4,minmax(58px,82px))}
+    .count-20{grid-template-columns:repeat(4,minmax(56px,76px))}
+    .app{padding:16px}
+  }
+
+  .brand-line{text-transform:uppercase;letter-spacing:.18em;color:#93c5fd;font-size:.78rem;font-weight:800;text-align:center;margin-bottom:6px}
+  .score-heading{text-align:center;font-size:.82rem;text-transform:uppercase;letter-spacing:.12em;color:#94a3b8;margin:12px 0 8px;font-weight:800}
+  .total-scoreboard{max-width:760px;margin:0 auto 18px;display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;background:linear-gradient(135deg,#172554,#1e3a8a);border:1px solid rgba(147,197,253,.35);border-radius:18px;padding:14px}
+  .total-scoreboard .score-number{color:#fde68a}
+  .site-label{position:fixed;left:12px;bottom:10px;z-index:50;background:rgba(15,23,42,.88);color:#cbd5e1;border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:8px 10px;font-size:.76rem}
+  .ttt-board{width:min(480px,100%);margin:18px auto;display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .ttt-cell{aspect-ratio:1;border:1px solid rgba(255,255,255,.16);border-radius:16px;background:linear-gradient(145deg,#1f2937,#111827);color:#fff;font-size:clamp(2.2rem,8vw,4.7rem);font-weight:900;cursor:pointer;display:grid;place-items:center}
+  .ttt-cell:hover:not(:disabled){transform:translateY(-2px);background:linear-gradient(145deg,#263449,#172033)}
+  .ttt-cell.x{color:#60a5fa}.ttt-cell.o{color:#f59e0b}.ttt-cell.win{outline:3px solid #34d399;background:#064e3b}
+
+
+  .barrier-board-wrap{
+    position:relative;
+    width:min(680px,100%);
+    margin:auto;
+    touch-action:manipulation;
+  }
+  .board{
+    position:relative;
+  }
+  .wall-layer{
+    position:absolute;
+    inset:8px;
+    pointer-events:none;
+    z-index:5;
+  }
+  .placed-wall{
+    position:absolute;
+    background:linear-gradient(180deg,#f8fafc,#cbd5e1);
+    border:3px solid #fbbf24;
+    border-radius:999px;
+    box-shadow:
+      0 0 0 2px rgba(15,23,42,.95),
+      0 3px 14px rgba(0,0,0,.65),
+      0 0 12px rgba(251,191,36,.45);
+  }
+  .placed-wall.horizontal{
+    height:14px;
+  }
+  .placed-wall.vertical{
+    width:14px;
+  }
+  .rotation-control{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    margin-top:10px;
+  }
+  .rotation-control button{
+    flex:1;
+    min-width:110px;
+    border:0;
+    border-radius:10px;
+    padding:10px;
+    font-weight:800;
+    cursor:pointer;
+  }
+  .rotation-control button.active{
+    outline:3px solid var(--accent);
+  }
+  .barrier-preview{
+    outline:3px dashed #fbbf24!important;
+    outline-offset:-4px;
+  }
+  .mode-explainer{
+    max-width:760px;
+    margin:12px auto;
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:10px;
+  }
+  .mode-card{
+    background:#172033;
+    border:1px solid rgba(255,255,255,.1);
+    border-radius:14px;
+    padding:12px;
+    color:#dbeafe;
+    text-align:left;
+  }
+  .mode-card strong{display:block;color:#fff;margin-bottom:4px}
+  @media(max-width:700px){
+    body{padding:8px}
+    .app{padding:12px;border-radius:16px}
+    .setup{gap:8px}
+    .player-pair{width:100%;display:grid;grid-template-columns:1fr auto}
+    .player-pair input{min-width:0;width:100%}
+    .player-pair select{min-width:96px}
+    .barrier-wrap{grid-template-columns:1fr}
+    .side-panel{position:static;width:100%}
+    .mode-explainer{grid-template-columns:1fr}
+    .board{gap:3px;padding:6px}
+    .cell{border-radius:6px;font-size:.9rem}
+    .top-tools,.keybind-bar{gap:6px}
+    .tool-toggle,.preset-btn,.ghost-btn{padding:9px 10px}
+  }
+
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="brand-line">Local Multiplayer Collection</div>
+  <h1>Offline Party Games</h1>
+  <p class="subtitle">Download once, then play offline on one device.</p>
+  <div class="top-tools">
+    <button id="soundToggle" class="tool-toggle on">🔊 Sound</button>
+    <button id="animationToggle" class="tool-toggle on">✨ Animations</button>
+    <button id="compactToggle" class="tool-toggle">↕ Compact</button>
+    <button id="fullscreenBtn" class="tool-toggle">⛶ Fullscreen</button>
+    <button id="resetScoresBtn" class="tool-toggle">🏆 Reset All Scores</button>
+  </div>
+  <div class="keybind-bar" aria-label="Keyboard shortcuts">
+    <span><kbd>R</kbd> Rematch</span>
+    <span><kbd>M</kbd> Mute</span>
+    <span><kbd>1</kbd> Bomb Chips</span>
+    <span><kbd>2</kbd> Barrier Duel</span>
+    <span><kbd>3</kbd> Tic-Tac-Toe</span>
+  </div>
+
+  
+  <div class="score-heading">All-Games Total Score</div>
+  <div class="total-scoreboard">
+    <div id="totalScoreP1" class="score-player">😀 Player 1<span class="score-number">0</span></div>
+    <div class="score-vs">TOTAL</div>
+    <div id="totalScoreP2" class="score-player">😎 Player 2<span class="score-number">0</span></div>
+  </div>
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="bombGame">Bomb Chips</button>
+    <button class="tab-btn" data-tab="barrierGame">Barrier Duel</button>
+    <button class="tab-btn" data-tab="ticTacToeGame">Tic-Tac-Toe</button>
+  </div>
+
+  <section id="bombGame" class="game-section active">
+    <div class="setup">
+      <div class="player-pair">
+        <input class="shared-p1" value="Player 1" aria-label="Player 1 name">
+        <select id="bombSkin1" aria-label="Player 1 character">
+          <option value="😀">😀 Classic</option>
+          <option value="🥷">🥷 Ninja</option>
+          <option value="🤖">🤖 Robot</option>
+          <option value="🦊">🦊 Fox</option>
+          <option value="🐸">🐸 Frog</option>
+
+          <option value="🦁">🦁 Lion</option>
+          <option value="🐼">🐼 Panda</option>
+          <option value="🐵">🐵 Monkey</option>
+          <option value="🐧">🐧 Penguin</option>
+          <option value="🐲">🐲 Dragon</option>
+          <option value="🦄">🦄 Unicorn</option>
+          <option value="🧛">🧛 Vampire</option>
+          <option value="🦸">🦸 Hero</option>
+          <option value="👑">👑 Royal</option>
+        </select>
+      </div>
+      <div class="player-pair">
+        <input class="shared-p2" value="Player 2" aria-label="Player 2 name">
+        <select id="bombSkin2" aria-label="Player 2 character">
+          <option value="😎">😎 Cool</option>
+          <option value="👻">👻 Ghost</option>
+          <option value="🐯">🐯 Tiger</option>
+          <option value="🧙">🧙 Wizard</option>
+          <option value="👽">👽 Alien</option>
+
+          <option value="🐶">🐶 Dog</option>
+          <option value="🐱">🐱 Cat</option>
+          <option value="🐺">🐺 Wolf</option>
+          <option value="🦈">🦈 Shark</option>
+          <option value="🦖">🦖 Dinosaur</option>
+          <option value="🧟">🧟 Zombie</option>
+          <option value="🧚">🧚 Fairy</option>
+          <option value="🦹">🦹 Villain</option>
+          <option value="🌟">🌟 Star</option>
+        </select>
+      </div>
+      <select id="bombOpponent">
+        <option value="human" selected>Human vs Human</option>
+        <option value="bot">Human vs Bot</option>
+      </select>
+      <select id="bombDifficulty">
+        <option value="easy">Easy</option>
+        <option value="normal">Normal</option>
+        <option value="human" selected>Human-like</option>
+        <option value="hard">Hard</option>
+        <option value="impossible">Impossible</option>
+      </select>
+      <select id="chipCount">
+        <option value="9" selected>9 chips</option>
+        <option value="12">12 chips</option>
+        <option value="16">16 chips</option>
+        <option value="20">20 chips</option>
+      </select>
+      <button id="bombStart" class="primary">Start Bomb Game</button>
+    </div>
+    <div id="bombScoreHeading" class="score-heading">Bomb Chips Score</div>
+    <div class="scoreboard">
+      <div id="bombScoreP1" class="score-player">😀 Player 1<span class="score-number">0</span></div>
+      <div class="score-vs">VS</div>
+      <div id="bombScoreP2" class="score-player">😎 Player 2<span class="score-number">0</span></div>
+    </div>
+    <div id="bombStatus" class="status">Press “Start Bomb Game”</div>
+    <div id="bombMessage" class="message">Each player secretly chooses bombs.</div>
+    <div id="bombBotSpeech" class="bot-speech"></div>
+    <div class="quick-presets">
+      <button id="bombQuickHuman" class="preset-btn">👥 Quick Human Game</button>
+      <button id="bombQuickBot" class="preset-btn">🤖 Quick Bot Game</button>
+    </div>
+    <section id="chips" class="chips count-9"></section>
+    <div class="legend">
+      <span><span class="dot blue"></span>Player 1 bombs after reveal</span>
+      <span><span class="dot orange"></span>Player 2 bombs after reveal</span>
+    </div>
+    <p class="small">9 chips: 1 bomb each · 12 chips: 2 each · 16 chips: 3 each · 20 chips: 4 each</p>
+    <div class="qol-row">
+      <button id="bombRematch" class="ghost-btn">🔁 Rematch</button>
+      <button id="bombResetScore" class="ghost-btn">🏆 Reset Bomb Score</button>
+      <button id="bombRulesBtn" class="ghost-btn">📖 Rules</button>
+      <button id="resetSavedBtn" class="ghost-btn">🧹 Reset Saved Settings</button>
+    </div>
+    <div id="bombRules" class="rules-box">
+      <strong>Bomb Chips:</strong> Each player secretly chooses bombs. Take turns picking chips. Any bomb blows up whoever selects it. All bombs are revealed when the round ends.<br><br><strong>Shortcuts:</strong> R = rematch, M = mute, 1 = Bomb Chips, 2 = Barrier Duel.
+    </div>
+    <div class="history-box">
+      <strong>Recent Bomb Turns</strong>
+      <ol id="bombHistory" class="history-list"></ol>
+    </div>
+  </section>
+
+  <section id="barrierGame" class="game-section">
+    <div class="setup">
+      <div class="player-pair">
+        <input class="shared-p1" value="Player 1" aria-label="Player 1 name">
+        <select id="barrierSkin1" aria-label="Player 1 character">
+          <option value="😀">😀 Classic</option>
+          <option value="🥷">🥷 Ninja</option>
+          <option value="🤖">🤖 Robot</option>
+          <option value="🦊">🦊 Fox</option>
+          <option value="🐸">🐸 Frog</option>
+
+          <option value="🦁">🦁 Lion</option>
+          <option value="🐼">🐼 Panda</option>
+          <option value="🐵">🐵 Monkey</option>
+          <option value="🐧">🐧 Penguin</option>
+          <option value="🐲">🐲 Dragon</option>
+          <option value="🦄">🦄 Unicorn</option>
+          <option value="🧛">🧛 Vampire</option>
+          <option value="🦸">🦸 Hero</option>
+          <option value="👑">👑 Royal</option>
+        </select>
+      </div>
+      <div class="player-pair">
+        <input class="shared-p2" value="Player 2" aria-label="Player 2 name">
+        <select id="barrierSkin2" aria-label="Player 2 character">
+          <option value="😎">😎 Cool</option>
+          <option value="👻">👻 Ghost</option>
+          <option value="🐯">🐯 Tiger</option>
+          <option value="🧙">🧙 Wizard</option>
+          <option value="👽">👽 Alien</option>
+
+          <option value="🐶">🐶 Dog</option>
+          <option value="🐱">🐱 Cat</option>
+          <option value="🐺">🐺 Wolf</option>
+          <option value="🦈">🦈 Shark</option>
+          <option value="🦖">🦖 Dinosaur</option>
+          <option value="🧟">🧟 Zombie</option>
+          <option value="🧚">🧚 Fairy</option>
+          <option value="🦹">🦹 Villain</option>
+          <option value="🌟">🌟 Star</option>
+        </select>
+      </div>
+      <select id="barrierOpponent">
+        <option value="human" selected>Human vs Human</option>
+        <option value="bot">Human vs Bot</option>
+      </select>
+      <select id="barrierDifficulty">
+        <option value="easy">Easy</option>
+        <option value="normal">Normal</option>
+        <option value="human" selected>Human-like</option>
+        <option value="hard">Hard</option>
+        <option value="impossible">Impossible</option>
+      </select>
+      <select id="barrierMode">
+        <option value="classic">Classic Race</option>
+        <option value="walls">Wall Builder</option>
+        <option value="speed">Speed Mode</option>
+      </select>
+      <button id="barrierStart" class="primary">Start Barrier Duel</button>
+    </div>
+    <div id="barrierScoreHeading" class="score-heading">Barrier Duel Score</div>
+    <div class="scoreboard">
+      <div id="barrierScoreP1" class="score-player">😀 Player 1<span class="score-number">0</span></div>
+      <div class="score-vs">VS</div>
+      <div id="barrierScoreP2" class="score-player">😎 Player 2<span class="score-number">0</span></div>
+    </div>
+    <div id="barrierStatus" class="status">Press “Start Barrier Duel”</div>
+    <div id="barrierMessage" class="message">Reach the opposite side while blocking your opponent.</div>
+
+    <div class="mode-explainer">
+      <div class="mode-card"><strong>Classic Race</strong>7 × 7 board. Five barriers each. Balanced standard game.</div>
+      <div class="mode-card"><strong>Wall Builder</strong>8 × 8 board. Eight barriers each. More blocking and longer games.</div>
+      <div class="mode-card"><strong>Speed Mode</strong>6 × 6 board. Three barriers each. Faster rounds with fewer walls.</div>
+    </div>
+
+    <div id="barrierBotSpeech" class="bot-speech"></div>
+    <div class="quick-presets">
+      <button id="barrierQuickHuman" class="preset-btn">👥 Quick Human Game</button>
+      <button id="barrierQuickBot" class="preset-btn">🤖 Quick Bot Game</button>
+      <button id="barrierUndo" class="preset-btn undo-btn" disabled>↶ Undo Last Turn</button>
+    </div>
+
+    <div class="barrier-wrap">
+      <div class="barrier-board-wrap"><div id="board" class="board"></div><div id="wallLayer" class="wall-layer"></div></div>
+      <aside class="side-panel">
+        <h3>Barrier Duel</h3>
+        <div id="modeInfo" class="mode-box">Classic Race: 7 × 7 board, 5 barriers each.</div>
+        <p><strong>Turn:</strong> <span id="turnName">—</span></p>
+        <p><strong>Barriers left:</strong><br>
+          <span id="barriersLeft">—</span>
+        </p>
+        <div class="action-buttons">
+          <button id="moveAction" class="move-btn selected-action">Move Player</button>
+          <button id="wallAction" class="barrier-btn">Place Barrier</button>
+        </div>
+        <div class="rotation-control">
+          <button id="wallHorizontal" class="secondary active">↔ Horizontal</button>
+          <button id="wallVertical" class="secondary">↕ Vertical</button>
+        </div>
+        <p class="small">Move one square up, down, left or right. Barriers are 2 spaces long and cannot remove every path.</p>
+      </aside>
+    </div>
+    <div class="qol-row">
+      <button id="barrierRematch" class="ghost-btn">🔁 Rematch</button>
+      <button id="barrierResetScore" class="ghost-btn">🏆 Reset Barrier Score</button>
+      <button id="barrierRulesBtn" class="ghost-btn">📖 Rules</button>
+    </div>
+    <div id="barrierRules" class="rules-box">
+      <strong>Barrier Duel:</strong> Move one square or place one barrier. Reach the opposite side first. Barriers cannot completely remove a path for either player.<br><br><strong>Shortcuts:</strong> R = rematch, M = mute, 1 = Bomb Chips, 2 = Barrier Duel.
+    </div>
+    <div class="history-box">
+      <strong>Recent Barrier Turns</strong>
+      <ol id="barrierHistory" class="history-list"></ol>
+    </div>
+  </section>
+  <section id="ticTacToeGame" class="game-section">
+    <div class="setup">
+      <div class="player-pair">
+        <input class="shared-p1" value="Player 1" aria-label="Player 1 name">
+        <select id="tttSkin1"><option value="😀">😀 Classic</option><option value="🥷">🥷 Ninja</option><option value="🦊">🦊 Fox</option><option value="🐼">🐼 Panda</option><option value="🐲">🐲 Dragon</option><option value="👑">👑 Royal</option></select>
+      </div>
+      <div class="player-pair">
+        <input class="shared-p2" value="Player 2" aria-label="Player 2 name">
+        <select id="tttSkin2"><option value="😎">😎 Cool</option><option value="👻">👻 Ghost</option><option value="🐯">🐯 Tiger</option><option value="🧙">🧙 Wizard</option><option value="👽">👽 Alien</option><option value="🌟">🌟 Star</option></select>
+      </div>
+      <select id="tttOpponent"><option value="human" selected>Human vs Human</option><option value="bot">Human vs Bot</option></select>
+      <select id="tttDifficulty"><option value="easy">Easy</option><option value="normal">Normal</option><option value="human" selected>Human-like</option><option value="hard">Hard</option><option value="impossible">Impossible</option></select>
+      <button id="tttStart" class="primary">Start Tic-Tac-Toe</button>
+    </div>
+    <div id="tttScoreHeading" class="score-heading">Tic-Tac-Toe Score</div>
+    <div class="scoreboard">
+      <div id="tttScoreP1" class="score-player">😀 Player 1<span class="score-number">0</span></div>
+      <div class="score-vs">VS</div>
+      <div id="tttScoreP2" class="score-player">😎 Player 2<span class="score-number">0</span></div>
+    </div>
+    <div id="tttStatus" class="status">Press “Start Tic-Tac-Toe”</div>
+    <div id="tttMessage" class="message">Get three in a row.</div>
+    <div id="tttBotSpeech" class="bot-speech"></div>
+    <div id="tttBoard" class="ttt-board"></div>
+    <div class="qol-row">
+      <button id="tttRematch" class="ghost-btn">🔁 Rematch</button>
+      <button id="tttResetScore" class="ghost-btn">🏆 Reset Tic-Tac-Toe Score</button>
+      <button id="tttRulesBtn" class="ghost-btn">📖 Rules</button>
+    </div>
+    <div id="tttRules" class="rules-box"><strong>Tic-Tac-Toe:</strong> Take turns placing X and O. The first player to make three in a row wins.</div>
+  </section>
+
+</div>
+
+<div id="overlay" class="overlay">
+  <div class="card">
+    <h2 id="overlayTitle">Pass the laptop</h2>
+    <p id="overlayText"></p>
+    <button id="overlayBtn" class="primary">Continue</button>
+  </div>
+</div>
+
+<script>
+(() => {
+  /* Shared overlay */
+  const overlay = document.getElementById('overlay');
+  const overlayTitle = document.getElementById('overlayTitle');
+  const overlayText = document.getElementById('overlayText');
+  const overlayBtn = document.getElementById('overlayBtn');
+  let overlayAction = null;
+
+  function showOverlay(title,text,buttonText,action){
+    overlayTitle.textContent = title;
+    overlayText.textContent = text;
+    overlayBtn.textContent = buttonText;
+    overlayAction = action;
+    overlay.classList.add('show');
+  }
+  overlayBtn.addEventListener('click',()=>{
+    overlay.classList.remove('show');
+    const action = overlayAction;
+    overlayAction = null;
+    if(action) action();
+  });
+
+  /* Tabs */
+  document.querySelectorAll('.tab-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+      document.querySelectorAll('.game-section').forEach(s=>s.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(btn.dataset.tab).classList.add('active');
+    });
+  });
+
+
+
+  let soundEnabled=true;
+  let animationsEnabled=true;
+  let compactMode=false;
+  let scores={
+    bomb:{human:[0,0],bot:[0,0]},
+    barrier:{human:[0,0],bot:[0,0]},
+    ttt:{human:[0,0],bot:[0,0]}
+  };
+
+  function currentScoreMode(game){
+    const id=game==='bomb'?'bombOpponent':game==='barrier'?'barrierOpponent':'tttOpponent';
+    const control=document.getElementById(id);
+    return control && control.value==='bot' ? 'bot' : 'human';
+  }
+
+  function gameScore(game){
+    return scores[game][currentScoreMode(game)];
+  }
+
+  function allModeTotals(){
+    const total=[0,0];
+    for(const game of ['bomb','barrier','ttt']){
+      for(const mode of ['human','bot']){
+        total[0]+=scores[game][mode][0];
+        total[1]+=scores[game][mode][1];
+      }
+    }
+    return total;
+  }
+  let bombHistory=[];
+  let barrierHistory=[];
+  let barrierSnapshots=[];
+
+  function beep(type='move'){
+    if(!soundEnabled) return;
+    try{
+      const ctx=new (window.AudioContext||window.webkitAudioContext)();
+      const osc=ctx.createOscillator();
+      const gain=ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      const map={
+        move:[440,.08],
+        safe:[620,.12],
+        bomb:[120,.35],
+        win:[780,.22],
+        wall:[260,.10]
+      };
+      const [freq,duration]=map[type]||map.move;
+      osc.frequency.value=freq;
+      gain.gain.setValueAtTime(.07,ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+duration);
+      osc.start();
+      osc.stop(ctx.currentTime+duration);
+      osc.onended=()=>ctx.close();
+    }catch(e){}
+  }
+
+  function scoreName(game,player){
+    const names=game==='bomb'?bPlayers:gPlayers;
+    return names[player] || `Player ${player+1}`;
+  }
+
+  function renderScores(){
+    for(const game of ['bomb','barrier','ttt']){
+      if(!scores[game]) scores[game]={human:[0,0],bot:[0,0]};
+      if(!scores[game].human) scores[game].human=[0,0];
+      if(!scores[game].bot) scores[game].bot=[0,0];
+    }
+
+    const bombMode=currentScoreMode('bomb');
+    const barrierMode=currentScoreMode('barrier');
+    const tttMode=currentScoreMode('ttt');
+
+    const bombNames=[
+      `${sharedSkins[0]} ${sharedNames[0]}`,
+      bombMode==='bot'?'🤖 Bot':`${sharedSkins[1]} ${savedHumanPlayer2Name||sharedNames[1]}`
+    ];
+    const barrierNames=[
+      `${sharedSkins[0]} ${sharedNames[0]}`,
+      barrierMode==='bot'?'🤖 Bot':`${sharedSkins[1]} ${savedHumanPlayer2Name||sharedNames[1]}`
+    ];
+    const tttNames=[
+      `${sharedSkins[0]} ${sharedNames[0]}`,
+      tttMode==='bot'?'🤖 Bot':`${sharedSkins[1]} ${savedHumanPlayer2Name||sharedNames[1]}`
+    ];
+
+    const bombScore=scores.bomb[bombMode];
+    const barrierScore=scores.barrier[barrierMode];
+    const tttScore=scores.ttt[tttMode];
+
+    document.getElementById('bombScoreHeading').textContent=`Bomb Chips · ${bombMode==='bot'?'Human vs Bot':'Human vs Human'}`;
+    document.getElementById('barrierScoreHeading').textContent=`Barrier Duel · ${barrierMode==='bot'?'Human vs Bot':'Human vs Human'}`;
+    document.getElementById('tttScoreHeading').textContent=`Tic-Tac-Toe · ${tttMode==='bot'?'Human vs Bot':'Human vs Human'}`;
+
+    document.getElementById('bombScoreP1').innerHTML=`${bombNames[0]}<span class="score-number">${bombScore[0]}</span>`;
+    document.getElementById('bombScoreP2').innerHTML=`${bombNames[1]}<span class="score-number">${bombScore[1]}</span>`;
+    document.getElementById('barrierScoreP1').innerHTML=`${barrierNames[0]}<span class="score-number">${barrierScore[0]}</span>`;
+    document.getElementById('barrierScoreP2').innerHTML=`${barrierNames[1]}<span class="score-number">${barrierScore[1]}</span>`;
+
+    if(document.getElementById('tttScoreP1')){
+      document.getElementById('tttScoreP1').innerHTML=`${tttNames[0]}<span class="score-number">${tttScore[0]}</span>`;
+      document.getElementById('tttScoreP2').innerHTML=`${tttNames[1]}<span class="score-number">${tttScore[1]}</span>`;
+    }
+
+    const totals=allModeTotals();
+    document.getElementById('totalScoreP1').innerHTML=`${sharedSkins[0]} ${sharedNames[0]}<span class="score-number">${totals[0]}</span>`;
+    document.getElementById('totalScoreP2').innerHTML=`All opponents<span class="score-number">${totals[1]}</span>`;
+  }
+
+  function addHistory(game,text){
+    const list=game==='bomb'?bombHistory:barrierHistory;
+    list.unshift(text);
+    if(list.length>8) list.length=8;
+    const el=document.getElementById(game==='bomb'?'bombHistory':'barrierHistory');
+    el.innerHTML=list.map(item=>`<li>${item}</li>`).join('');
+  }
+
+  function clearHistory(game){
+    if(game==='bomb') bombHistory=[];
+    else barrierHistory=[];
+    const el=document.getElementById(game==='bomb'?'bombHistory':'barrierHistory');
+    el.innerHTML='';
+  }
+
+  function saveBarrierSnapshot(){
+    barrierSnapshots.push({
+      positions:positions.map(p=>[...p]),
+      barriers:barriers.map(w=>({...w})),
+      barriersRemaining:[...barriersRemaining],
+      currentGridPlayer,
+      selectedAction
+    });
+    if(barrierSnapshots.length>20) barrierSnapshots.shift();
+    document.getElementById('barrierUndo').disabled=barrierSnapshots.length===0 || barrierVsBot;
+  }
+
+  function updateModeLabels(){
+    const bombMode=document.getElementById('bombOpponent').value==='bot'
+      ? `Bot · ${document.getElementById('bombDifficulty').value}`
+      : 'Human vs Human';
+    const barrierModeText=document.getElementById('barrierOpponent').value==='bot'
+      ? `Bot · ${document.getElementById('barrierDifficulty').value}`
+      : 'Human vs Human';
+
+    document.getElementById('bombStatus').dataset.mode=bombMode;
+    document.getElementById('barrierStatus').dataset.mode=barrierModeText;
+  }
+
+  function markActiveScore(game,player){
+    const ids=game==='bomb'
+      ? ['bombScoreP1','bombScoreP2']
+      : ['barrierScoreP1','barrierScoreP2'];
+    ids.forEach((id,i)=>document.getElementById(id).classList.toggle('active-player',i===player));
+  }
+
+  function saveScores(){
+    localStorage.setItem('offlinePartyGamesScores',JSON.stringify(scores));
+  }
+
+  function loadScores(){
+    try{
+      const saved=JSON.parse(localStorage.getItem('offlinePartyGamesScores')||'null');
+      if(saved?.bomb && saved?.barrier){
+        const migrate=value=>{
+          if(Array.isArray(value)) return {human:value,bot:[0,0]};
+          return {
+            human:Array.isArray(value?.human)?value.human:[0,0],
+            bot:Array.isArray(value?.bot)?value.bot:[0,0]
+          };
+        };
+        scores={
+          bomb:migrate(saved.bomb),
+          barrier:migrate(saved.barrier),
+          ttt:migrate(saved.ttt||[0,0])
+        };
+      }
+    }catch(e){}
+  }
+
+  /* Shared player identity */
+  let sharedNames = ['Player 1','Player 2'];
+  let sharedSkins = ['😀','😎'];
+  let savedHumanPlayer2Name = 'Player 2';
+
+  function syncSharedNames(source){
+    const p1 = source.querySelector('.shared-p1')?.value.trim() || sharedNames[0];
+    const p2 = source.querySelector('.shared-p2')?.value.trim() || sharedNames[1];
+    sharedNames = [p1,p2];
+    document.querySelectorAll('.shared-p1').forEach(el=>el.value=sharedNames[0]);
+    document.querySelectorAll('.shared-p2').forEach(el=>el.value=sharedNames[1]);
+  }
+
+  document.querySelectorAll('.shared-p1,.shared-p2').forEach(el=>{
+    el.addEventListener('input',(event)=>{
+      const target=event.target;
+      const isPlayer1=target.classList.contains('shared-p1');
+      const groupClass=isPlayer1 ? '.shared-p1' : '.shared-p2';
+      const typedValue=target.value;
+
+      if(isPlayer1){
+        sharedNames[0]=typedValue;
+      }else{
+        sharedNames[1]=typedValue;
+        if(typedValue.trim()) savedHumanPlayer2Name=typedValue;
+      }
+
+      // Mirror the exact text into the matching field in the other game.
+      // Do not read from the first input, because that caused the name to jump back.
+      document.querySelectorAll(groupClass).forEach(field=>{
+        if(field!==target) field.value=typedValue;
+      });
+    });
+
+    el.addEventListener('blur',(event)=>{
+      const target=event.target;
+      const isPlayer1=target.classList.contains('shared-p1');
+      const fallback=isPlayer1 ? 'Player 1' : 'Player 2';
+
+      if(!target.value.trim()){
+        target.value=fallback;
+        if(isPlayer1) sharedNames[0]=fallback;
+        else sharedNames[1]=fallback;
+
+        document.querySelectorAll(isPlayer1 ? '.shared-p1' : '.shared-p2')
+          .forEach(field=>field.value=fallback);
+      }
+    });
+  });
+
+
+  function saveSettings(){
+    const data={
+      names:sharedNames,
+      skins:sharedSkins,
+      savedHumanPlayer2Name,
+      bombOpponent:document.getElementById('bombOpponent').value,
+      bombDifficulty:document.getElementById('bombDifficulty').value,
+      chipCount:document.getElementById('chipCount').value,
+      barrierOpponent:document.getElementById('barrierOpponent').value,
+      barrierDifficulty:document.getElementById('barrierDifficulty').value,
+      barrierMode:document.getElementById('barrierMode').value,
+      soundEnabled,
+      animationsEnabled,
+      compactMode
+    };
+    localStorage.setItem('offlinePartyGamesSettings',JSON.stringify(data));
+  }
+
+  function loadSettings(){
+    try{
+      const data=JSON.parse(localStorage.getItem('offlinePartyGamesSettings')||'null');
+      if(!data) return;
+      sharedNames=data.names||sharedNames;
+      sharedSkins=data.skins||sharedSkins;
+      savedHumanPlayer2Name=data.savedHumanPlayer2Name||sharedNames[1]||'Player 2';
+      document.querySelectorAll('.shared-p1').forEach(x=>x.value=sharedNames[0]);
+      document.querySelectorAll('.shared-p2').forEach(x=>x.value=sharedNames[1]);
+      document.getElementById('bombSkin1').value=sharedSkins[0];
+      document.getElementById('bombSkin2').value=sharedSkins[1];
+      document.getElementById('barrierSkin1').value=sharedSkins[0];
+      document.getElementById('barrierSkin2').value=sharedSkins[1];
+      if(data.bombOpponent) document.getElementById('bombOpponent').value=data.bombOpponent;
+      if(data.bombDifficulty) document.getElementById('bombDifficulty').value=data.bombDifficulty;
+      if(data.chipCount) document.getElementById('chipCount').value=data.chipCount;
+      if(data.barrierOpponent) document.getElementById('barrierOpponent').value=data.barrierOpponent;
+      if(data.barrierDifficulty) document.getElementById('barrierDifficulty').value=data.barrierDifficulty;
+      if(data.barrierMode) document.getElementById('barrierMode').value=data.barrierMode;
+      if(typeof data.soundEnabled==='boolean') soundEnabled=data.soundEnabled;
+      if(typeof data.animationsEnabled==='boolean') animationsEnabled=data.animationsEnabled;
+      if(typeof data.compactMode==='boolean') compactMode=data.compactMode;
+    }catch(e){}
+  }
+
+  function setOpponentField(gameId, isBot){
+    const section=document.getElementById(gameId);
+    const field=section.querySelector('.shared-p2');
+    const pair=field.closest('.player-pair');
+
+    if(isBot){
+      if(field.value.trim() && field.value.trim()!=='Bot'){
+        savedHumanPlayer2Name=field.value.trim();
+      }
+      field.value='Bot';
+      field.disabled=true;
+      pair.classList.add('disabled-player');
+    }else{
+      field.disabled=false;
+      field.value=savedHumanPlayer2Name || sharedNames[1] || 'Player 2';
+      sharedNames[1]=field.value;
+      pair.classList.remove('disabled-player');
+
+      document.querySelectorAll('.shared-p2').forEach(other=>{
+        const parentSection=other.closest('.game-section');
+        const opponentSelect=parentSection?.querySelector('select[id$="Opponent"]');
+        const otherIsBot=opponentSelect?.value==='bot';
+        if(!otherIsBot) other.value=field.value;
+      });
+    }
+  }
+
+
+  function refreshScoreDisplays(){
+    renderScores();
+    saveScores();
+  }
+
+  function updateOpponentControls(){
+    const bombBot=document.getElementById('bombOpponent').value==='bot';
+    document.getElementById('bombDifficulty').classList.toggle('hidden-control',!bombBot);
+    document.getElementById('bombSkin2').disabled=bombBot;
+    setOpponentField('bombGame',bombBot);
+
+    const barrierBot=document.getElementById('barrierOpponent').value==='bot';
+    document.getElementById('barrierDifficulty').classList.toggle('hidden-control',!barrierBot);
+    document.getElementById('barrierSkin2').disabled=barrierBot;
+    setOpponentField('barrierGame',barrierBot);
+
+    const tttOpponent=document.getElementById('tttOpponent');
+    if(tttOpponent){
+      const tttBot=tttOpponent.value==='bot';
+      document.getElementById('tttDifficulty').classList.toggle('hidden-control',!tttBot);
+      document.getElementById('tttSkin2').disabled=tttBot;
+      setOpponentField('ticTacToeGame',tttBot);
+    }
+
+    refreshScoreDisplays();
+    saveSettings();
+  }
+
+  document.querySelectorAll('input,select').forEach(el=>{
+    el.addEventListener('change',saveSettings);
+  });
+
+  /* Bomb Chips */
+  const chipsEl = document.getElementById('chips');
+  const bombStatus = document.getElementById('bombStatus');
+  const bombMessage = document.getElementById('bombMessage');
+  let bPlayers = ['Player 1','Player 2'];
+  let bombs = [[],[]];
+  let selectingPlayer = 0;
+  let bombsPerPlayer = 1;
+  let currentBombPlayer = 0;
+  let bombPhase = 'idle';
+  let remaining = 0;
+  let bombVsBot = false;
+  let bombBotBusy = false;
+
+  const bombBotSpeech=document.getElementById('bombBotSpeech');
+  const barrierBotSpeech=document.getElementById('barrierBotSpeech');
+
+  const botLines={
+    bomb:{
+      easy:[
+        "Hmm... this one looks safe. Probably.",
+        "I have a good feeling about this chip!",
+        "Wait... did I put a bomb there?",
+        "I’m just guessing!"
+      ],
+      normal:[
+        "Let me think this through.",
+        "I’ll play it safe... mostly.",
+        "That chip looks suspicious.",
+        "I think this is the right choice."
+      ],
+      human:[
+        "I remember where some of the danger is.",
+        "I’m not rushing this one.",
+        "You might have hidden one here...",
+        "I’m trying to read your strategy."
+      ],
+      hard:[
+        "I’ve narrowed down the safest options.",
+        "Your trap will not be that easy.",
+        "I’ve calculated the risk.",
+        "I’m choosing carefully."
+      ],
+      impossible:[
+        "I already know the safest chip.",
+        "You cannot outsmart perfect information.",
+        "Your bombs are obvious to me.",
+        "This round is already decided."
+      ]
+    },
+    barrier:{
+      easy:[
+        "Maybe I’ll put a wall here!",
+        "I think this way goes forward... maybe.",
+        "Oops, that might not help me.",
+        "I’m just trying something."
+      ],
+      normal:[
+        "I need to balance moving and blocking.",
+        "That path looks useful.",
+        "I should not waste all my barriers.",
+        "I think this move helps."
+      ],
+      human:[
+        "You’re getting close, so I need to react.",
+        "I’ll move now and save a barrier for later.",
+        "I’m watching both paths.",
+        "I need to think a few turns ahead."
+      ],
+      hard:[
+        "I found the strongest route.",
+        "That barrier gives me the advantage.",
+        "Your shortest path is about to get longer.",
+        "I won’t waste this turn."
+      ],
+      impossible:[
+        "Every route has already been evaluated.",
+        "I know your best move before you make it.",
+        "The board is under my control.",
+        "There is no winning line for you."
+      ]
+    }
+  };
+
+  function showBotLine(game,difficulty){
+    const box=game==='bomb'?bombBotSpeech:barrierBotSpeech;
+    const lines=botLines[game][difficulty]||botLines[game].human;
+    box.textContent=`🤖 ${lines[Math.floor(Math.random()*lines.length)]}`;
+    box.classList.add('show');
+  }
+
+  function hideBotLine(game){
+    const box=game==='bomb'?bombBotSpeech:barrierBotSpeech;
+    box.classList.remove('show');
+  }
+
+  function buildChips(count){
+    chipsEl.innerHTML = '';
+    chipsEl.className = `chips count-${count}`;
+    for(let i=0;i<count;i++){
+      const chip = document.createElement('button');
+      chip.className = 'chip';
+      chip.textContent = i + 1;
+      chip.addEventListener('click',()=>handleChip(chip,i));
+      chipsEl.appendChild(chip);
+    }
+  }
+
+  function revealBombs(){
+    [...chipsEl.children].forEach((chip,i)=>{
+      const p1 = bombs[0].includes(i);
+      const p2 = bombs[1].includes(i);
+      if(p1 && p2) chip.classList.add('reveal-both');
+      else if(p1) chip.classList.add('reveal-p1');
+      else if(p2) chip.classList.add('reveal-p2');
+      if(p1 || p2){
+        chip.textContent = '💣';
+        chip.classList.add('bomb');
+      }
+    });
+  }
+
+  function startBombGame(){
+    clearHistory('bomb');
+    updateModeLabels();
+    hideBotLine('bomb');
+    saveSettings();
+    syncSharedNames(document.getElementById('bombGame'));
+    bombVsBot = document.getElementById('bombOpponent').value === 'bot';
+    bombBotBusy = false;
+    sharedSkins[0] = document.getElementById('bombSkin1').value;
+    sharedSkins[1] = document.getElementById('bombSkin2').value;
+    document.getElementById('barrierSkin1').value = sharedSkins[0];
+    document.getElementById('barrierSkin2').value = sharedSkins[1];
+
+    bPlayers = [
+      `${sharedSkins[0]} ${sharedNames[0]}`,
+      bombVsBot ? `🤖 Bot` : `${sharedSkins[1]} ${sharedNames[1]}`
+    ];
+
+    const count = Number(document.getElementById('chipCount').value);
+    bombs = [[],[]];
+    selectingPlayer = 0;
+    currentBombPlayer = 0;
+    remaining = count;
+    bombPhase = 'chooseBomb';
+    bombsPerPlayer = count <= 9 ? 1 : count <= 12 ? 2 : count <= 16 ? 3 : 4;
+    buildChips(count);
+    bombStatus.textContent = `${bPlayers[0]}: choose ${bombsPerPlayer} bomb${bombsPerPlayer>1?'s':''}`;
+    markActiveScore('bomb',0);
+    renderScores();
+    bombMessage.textContent = bombVsBot ? 'Choose your bombs. The bot will choose automatically.' : `${bPlayers[1]} should look away.`;
+  }
+
+  function chooseBomb(index){
+    if(bombs[selectingPlayer].includes(index)) return;
+    bombs[selectingPlayer].push(index);
+    addHistory('bomb',`${bPlayers[selectingPlayer]} secretly selected a bomb.`);
+    const left = bombsPerPlayer - bombs[selectingPlayer].length;
+
+    if(left>0){
+      bombStatus.textContent = `${bPlayers[selectingPlayer]}: choose ${left} more bomb${left>1?'s':''}`;
+      return;
+    }
+
+    if(selectingPlayer===0){
+      if(bombVsBot){
+        const total = Number(document.getElementById('chipCount').value);
+        const choices = [...Array(total).keys()];
+        while(bombs[1].length < bombsPerPlayer){
+          const pick = choices[Math.floor(Math.random()*choices.length)];
+          if(!bombs[1].includes(pick)) bombs[1].push(pick);
+        }
+        bombPhase='playing';
+        currentBombPlayer=0;
+        bombStatus.textContent=`${bPlayers[0]}'s turn`;
+        bombMessage.textContent='The bot has secretly chosen its bombs. Choose any chip.';
+      }else{
+        bombPhase='transition';
+        showOverlay(
+          `Pass the laptop to ${bPlayers[1]}`,
+          `${bPlayers[0]}'s bombs are hidden.`,
+          'Choose My Bombs',
+          ()=>{
+            selectingPlayer=1;
+            bombPhase='chooseBomb';
+            bombStatus.textContent=`${bPlayers[1]}: choose ${bombsPerPlayer} bomb${bombsPerPlayer>1?'s':''}`;
+          markActiveScore('bomb',1);
+            bombMessage.textContent=`${bPlayers[0]} should look away.`;
+          }
+        );
+      }
+    }else{
+      bombPhase='transition';
+      showOverlay(
+        'Bombs are ready',
+        `Pass the laptop to ${bPlayers[0]} to begin.`,
+        'Start Game',
+        ()=>{
+          bombPhase='playing';
+          currentBombPlayer=0;
+          bombStatus.textContent=`${bPlayers[0]}'s turn`;
+          markActiveScore('bomb',0);
+          bombMessage.textContent='Choose any chip.';
+        }
+      );
+    }
+  }
+
+
+  function botBombMove(){
+    if(!bombVsBot || bombPhase!=='playing' || currentBombPlayer!==1 || bombBotBusy) return;
+    bombBotBusy = true;
+
+    const difficulty=document.getElementById('bombDifficulty').value;
+    const available=[...chipsEl.children]
+      .map((chip,i)=>({chip,i}))
+      .filter(x=>!x.chip.classList.contains('used'));
+
+    if(!available.length){
+      bombBotBusy=false;
+      return;
+    }
+
+    const safeFromOwn=available.filter(x=>!bombs[1].includes(x.i));
+    const riskyOwn=available.filter(x=>bombs[1].includes(x.i));
+
+    let ownAvoidChance=0.55;
+    let delayMin=500, delayMax=1100;
+
+    if(difficulty==='normal'){ownAvoidChance=0.72;delayMin=800;delayMax=1500;}
+    if(difficulty==='human'){ownAvoidChance=0.83;delayMin=1200;delayMax=2600;}
+    if(difficulty==='hard'){ownAvoidChance=0.95;delayMin=900;delayMax=1700;}
+    if(difficulty==='impossible'){ownAvoidChance=1;delayMin=600;delayMax=1000;}
+
+    let pool=available;
+    if(safeFromOwn.length && Math.random()<ownAvoidChance) pool=safeFromOwn;
+    else if(riskyOwn.length && difficulty==='easy' && Math.random()<0.35) pool=riskyOwn;
+
+    if(difficulty==='impossible'){
+      const trulySafe=pool.filter(x=>!bombs[0].includes(x.i) && !bombs[1].includes(x.i));
+      if(trulySafe.length) pool=trulySafe;
+    }
+
+    const choice=pool[Math.floor(Math.random()*pool.length)] || available[0];
+    const delay=delayMin+Math.floor(Math.random()*(delayMax-delayMin+1));
+
+    const recoveryTimer=setTimeout(()=>{
+      if(bombBotBusy && bombPhase==='playing' && currentBombPlayer===1){
+        bombBotBusy=false;
+        const fallback=[...chipsEl.children]
+          .map((chip,i)=>({chip,i}))
+          .find(x=>!x.chip.classList.contains('used'));
+        if(fallback) handleChip(fallback.chip,fallback.i,true);
+      }
+    },delay+2500);
+
+    setTimeout(()=>{
+      clearTimeout(recoveryTimer);
+      if(bombPhase==='playing' && currentBombPlayer===1 && choice && !choice.chip.classList.contains('used')){
+        bombBotBusy=false;
+        handleChip(choice.chip,choice.i,true);
+      }else{
+        bombBotBusy=false;
+      }
+    },delay);
+  }
+
+  function endBombRound(loser, reason){
+    hideBotLine('bomb');
+    bombBotBusy=false;
+    bombPhase='finished';
+    gameScore('bomb')[1-loser]++;
+    saveScores();
+    renderScores();
+    markActiveScore('bomb',1-loser);
+    beep('bomb');
+    bombStatus.textContent=`BOOM! ${bPlayers[loser]} loses!`;
+    bombMessage.textContent=reason + ' All bombs are now revealed.';
+    revealBombs();
+    [...chipsEl.children].forEach(c=>c.disabled=true);
+  }
+
+  function handleChip(chip,index,fromBot=false){
+    if(bombVsBot && bombPhase==='playing' && currentBombPlayer===1 && !fromBot){
+      return;
+    }
+    if(bombPhase==='chooseBomb'){ chooseBomb(index); return; }
+    if(bombPhase!=='playing' || chip.classList.contains('used')) return;
+
+    chip.classList.add('used');
+    remaining--;
+    const opponent=1-currentBombPlayer;
+    const own=bombs[currentBombPlayer].includes(index);
+    const other=bombs[opponent].includes(index);
+
+    if(own || other){
+      chip.classList.add('bomb');
+      chip.textContent='💣';
+      let reason;
+      addHistory('bomb',`${bPlayers[currentBombPlayer]} picked chip ${index+1} and hit a bomb.`);
+      if(own && other) reason='Both players chose this bomb.';
+      else if(own) reason=`${bPlayers[currentBombPlayer]} selected one of their own bombs.`;
+      else reason=`${bPlayers[currentBombPlayer]} selected one of ${bPlayers[opponent]}'s bombs.`;
+      endBombRound(currentBombPlayer,reason);
+      return;
+    }
+
+    chip.classList.add('safe');
+    chip.textContent='✓';
+    addHistory('bomb',`${bPlayers[currentBombPlayer]} picked chip ${index+1}: safe.`);
+    beep('safe');
+    if(remaining===0){
+      bombPhase='finished';
+      bombStatus.textContent='Draw!';
+      bombMessage.textContent='No bomb was selected. All bombs are now revealed.';
+      revealBombs();
+      return;
+    }
+
+    currentBombPlayer=opponent;
+    bombBotBusy=false;
+
+    if(bombVsBot && currentBombPlayer===1){
+      markActiveScore('bomb',1);
+      bombStatus.textContent=`🤖 Bot's turn <span class="turn-badge">${document.getElementById('bombDifficulty').value}</span>`;
+      bombStatus.innerHTML=`🤖 Bot's turn <span class="turn-badge">${document.getElementById('bombDifficulty').value}</span>`;
+      bombMessage.textContent='The bot is thinking...';
+      showBotLine('bomb',document.getElementById('bombDifficulty').value);
+      botBombMove();
+    }else if(bombVsBot && currentBombPlayer===0){
+      hideBotLine('bomb');
+      markActiveScore('bomb',0);
+      bombStatus.textContent=`${bPlayers[0]}'s turn`;
+      bombMessage.textContent='Choose any remaining chip.';
+    }else{
+      setTimeout(()=>{
+        showOverlay(
+          `Pass the laptop to ${bPlayers[currentBombPlayer]}`,
+          'The previous chip was safe.',
+          'My Turn',
+          ()=>{
+            bombStatus.textContent=`${bPlayers[currentBombPlayer]}'s turn`;
+            bombMessage.textContent='Choose any remaining chip.';
+          }
+        );
+      },350);
+    }
+  }
+
+  document.getElementById('bombStart').addEventListener('click',startBombGame);
+  buildChips(9);
+
+  /* Barrier Duel */
+  const boardEl = document.getElementById('board');
+  const barrierStatus = document.getElementById('barrierStatus');
+  const barrierMessage = document.getElementById('barrierMessage');
+  const turnName = document.getElementById('turnName');
+  const barriersLeft = document.getElementById('barriersLeft');
+  const modeInfo = document.getElementById('modeInfo');
+  const moveAction = document.getElementById('moveAction');
+  const wallAction = document.getElementById('wallAction');
+
+  let gPlayers=['Player 1','Player 2'];
+  let size=7;
+  let positions=[[6,3],[0,3]];
+  let barriers=[];
+  let barriersRemaining=[5,5];
+  let currentGridPlayer=0;
+  let selectedAction='move';
+  let wallOrientation='horizontal';
+  let barrierPhase='idle';
+  let mode='classic';
+  let barrierVsBot=false;
+  let barrierBotBusy=false;
+  let botRecentPositions=[];
+  let botVisitedCounts={};
+  let botConsecutiveBarriers=0;
+
+  function key(r,c){return `${r},${c}`}
+
+  function wallSegments(wall){
+    const {r,c,orientation}=wall;
+    if(orientation==='horizontal'){
+      return [
+        {a:[r,c],b:[r+1,c]},
+        {a:[r,c+1],b:[r+1,c+1]}
+      ];
+    }
+    return [
+      {a:[r,c],b:[r,c+1]},
+      {a:[r+1,c],b:[r+1,c+1]}
+    ];
+  }
+
+  function sameEdge(a1,b1,a2,b2){
+    return (
+      (a1[0]===a2[0]&&a1[1]===a2[1]&&b1[0]===b2[0]&&b1[1]===b2[1]) ||
+      (a1[0]===b2[0]&&a1[1]===b2[1]&&b1[0]===a2[0]&&b1[1]===a2[1])
+    );
+  }
+
+  function edgeBlocked(a,b,extraWall=null){
+    const walls=extraWall?[...barriers,extraWall]:barriers;
+    return walls.some(w=>wallSegments(w).some(seg=>sameEdge(a,b,seg.a,seg.b)));
+  }
+
+  function wallOverlaps(candidate){
+    const candSegments=wallSegments(candidate);
+    return barriers.some(w=>{
+      if(w.orientation===candidate.orientation && w.r===candidate.r && w.c===candidate.c) return true;
+      const segs=wallSegments(w);
+      return candSegments.some(cs=>segs.some(s=>sameEdge(cs.a,cs.b,s.a,s.b)));
+    });
+  }
+
+  function modeSettings(value){
+    if(value==='walls') return {size:8,walls:8,info:'Wall Builder: 8 × 8 board, 8 barriers each.'};
+    if(value==='speed') return {size:6,walls:3,info:'Speed Mode: 6 × 6 board, 3 barriers each.'};
+    return {size:7,walls:5,info:'Classic Race: 7 × 7 board, 5 barriers each.'};
+  }
+
+  function renderBoard(){
+    boardEl.style.setProperty('--size',size);
+    boardEl.innerHTML='';
+    for(let r=0;r<size;r++){
+      for(let c=0;c<size;c++){
+        const cell=document.createElement('button');
+        cell.className='cell';
+        cell.dataset.r=r;
+        cell.dataset.c=c;
+        if(positions[0][0]===r && positions[0][1]===c){
+          cell.classList.add('p1');
+          cell.textContent=sharedSkins[0];
+        }
+        if(positions[1][0]===r && positions[1][1]===c){
+          cell.classList.add('p2');
+          cell.textContent=barrierVsBot ? '🤖' : sharedSkins[1];
+        }
+        cell.addEventListener('click',()=>handleBoardClick(r,c));
+        boardEl.appendChild(cell);
+      }
+    }
+
+    const wallLayer=document.getElementById('wallLayer');
+    wallLayer.innerHTML='';
+    const boardRect=boardEl.getBoundingClientRect();
+    const innerWidth=boardRect.width-16;
+    const cellSize=innerWidth/size;
+    barriers.forEach(w=>{
+      const div=document.createElement('div');
+      div.className=`placed-wall ${w.orientation}`;
+      if(w.orientation==='horizontal'){
+        div.style.left=`${w.c*cellSize+4}px`;
+        div.style.top=`${(w.r+1)*cellSize-7}px`;
+        div.style.width=`${2*cellSize-8}px`;
+      }else{
+        div.style.left=`${(w.c+1)*cellSize-7}px`;
+        div.style.top=`${w.r*cellSize+4}px`;
+        div.style.height=`${2*cellSize-8}px`;
+      }
+      wallLayer.appendChild(div);
+    });
+
+    turnName.textContent=gPlayers[currentGridPlayer];
+    barriersLeft.textContent=`${gPlayers[0]}: ${barriersRemaining[0]} | ${gPlayers[1]}: ${barriersRemaining[1]}`;
+  }
+
+  function setAction(action){
+    selectedAction=action;
+    moveAction.classList.toggle('selected-action',action==='move');
+    wallAction.classList.toggle('selected-action',action==='wall');
+    barrierMessage.textContent=action==='move'?'Select an adjacent square.':`Choose ${wallOrientation} orientation, then tap the top-left cell where the 2-space barrier begins.`;
+  }
+
+  function startBarrierGame(){
+    clearHistory('barrier');
+    barrierSnapshots=[];
+    document.getElementById('barrierUndo').disabled=true;
+    updateModeLabels();
+    hideBotLine('barrier');
+    saveSettings();
+    syncSharedNames(document.getElementById('barrierGame'));
+    barrierVsBot = document.getElementById('barrierOpponent').value === 'bot';
+    barrierBotBusy = false;
+    sharedSkins[0] = document.getElementById('barrierSkin1').value;
+    sharedSkins[1] = document.getElementById('barrierSkin2').value;
+    document.getElementById('bombSkin1').value = sharedSkins[0];
+    document.getElementById('bombSkin2').value = sharedSkins[1];
+
+    gPlayers=[
+      `${sharedSkins[0]} ${sharedNames[0]}`,
+      barrierVsBot ? '🤖 Bot' : `${sharedSkins[1]} ${sharedNames[1]}`
+    ];
+
+    mode=document.getElementById('barrierMode').value;
+    const settings=modeSettings(mode);
+    size=settings.size;
+    positions=[[size-1,Math.floor(size/2)],[0,Math.floor(size/2)]];
+    botVisitedCounts[key(positions[1][0],positions[1][1])]=1;
+    barriers=[];
+    barriersRemaining=[settings.walls,settings.walls];
+    currentGridPlayer=0;
+    selectedAction='move';
+    barrierPhase='playing';
+    modeInfo.textContent=settings.info + ' A full row or column cannot be blocked.';
+    barrierStatus.textContent=`${gPlayers[0]}'s turn`;
+    markActiveScore('barrier',0);
+    renderScores();
+    barrierMessage.textContent='Move one square or place a barrier.';
+    setAction('move');
+    renderBoard();
+  }
+
+  function validMove(r,c){
+    const [pr,pc]=positions[currentGridPlayer];
+    const distance=Math.abs(r-pr)+Math.abs(c-pc);
+    if(distance!==1) return false;
+    if(positions.some(p=>p[0]===r&&p[1]===c)) return false;
+    if(edgeBlocked([pr,pc],[r,c])) return false;
+    return true;
+  }
+
+  function switchGridTurn(){
+    currentGridPlayer=1-currentGridPlayer;
+    barrierStatus.textContent=`${gPlayers[currentGridPlayer]}'s turn`;
+    markActiveScore('barrier',currentGridPlayer);
+    setAction('move');
+    renderBoard();
+
+    const botTurn=barrierVsBot && currentGridPlayer===1;
+    moveAction.disabled=botTurn;
+    wallAction.disabled=botTurn;
+    wallHorizontal.disabled=botTurn;
+    wallVertical.disabled=botTurn;
+    [...boardEl.children].forEach(cell=>cell.disabled=botTurn);
+
+    if(botTurn){
+      barrierMessage.textContent=`The ${document.getElementById('barrierDifficulty').value} bot is planning its move...`;
+      showBotLine('barrier',document.getElementById('barrierDifficulty').value);
+      botBarrierTurn();
+    }else{
+      hideBotLine('barrier');
+      barrierMessage.textContent='Move one square or place a barrier.';
+    }
+  }
+
+  function checkWin(){
+    const [r]=positions[currentGridPlayer];
+    if((currentGridPlayer===0 && r===0) || (currentGridPlayer===1 && r===size-1)){
+      hideBotLine('barrier');
+      barrierPhase='finished';
+      gameScore('barrier')[currentGridPlayer]++;
+      saveScores();
+      renderScores();
+      markActiveScore('barrier',currentGridPlayer);
+      beep('win');
+      barrierStatus.textContent=`${gPlayers[currentGridPlayer]} wins!`;
+      barrierMessage.textContent='They reached the opposite side.';
+      [...boardEl.children].forEach(c=>c.disabled=true);
+      return true;
+    }
+    return false;
+  }
+
+
+  function hasPath(playerIndex,extraWall=null){
+    const start=positions[playerIndex];
+    const targetRow=playerIndex===0 ? 0 : size-1;
+    const queue=[start];
+    const seen=new Set([key(start[0],start[1])]);
+    const dirs=[[1,0],[-1,0],[0,1],[0,-1]];
+
+    while(queue.length){
+      const [r,c]=queue.shift();
+      if(r===targetRow) return true;
+      for(const [dr,dc] of dirs){
+        const nr=r+dr,nc=c+dc;
+        if(nr<0||nr>=size||nc<0||nc>=size) continue;
+        const k=key(nr,nc);
+        if(seen.has(k)) continue;
+        if(edgeBlocked([r,c],[nr,nc],extraWall)) continue;
+        seen.add(k);
+        queue.push([nr,nc]);
+      }
+    }
+    return false;
+  }
+
+  function legalBarrierPlacement(r,c,orientation=wallOrientation){
+    if(orientation==='horizontal'){
+      if(r<0||r>=size-1||c<0||c>=size-1) return false;
+    }else{
+      if(r<0||r>=size-1||c<0||c>=size-1) return false;
+    }
+
+    const candidate={r,c,orientation};
+    if(wallOverlaps(candidate)) return false;
+    if(!hasPath(0,candidate) || !hasPath(1,candidate)) return false;
+    return true;
+  }
+
+  function shortestPath(playerIndex,extraWall=null){
+    const start=positions[playerIndex];
+    const targetRow=playerIndex===0 ? 0 : size-1;
+    const queue=[[start[0],start[1],[]]];
+    const seen=new Set([key(start[0],start[1])]);
+    const dirs=[[1,0],[-1,0],[0,1],[0,-1]];
+
+    while(queue.length){
+      const [r,c,path]=queue.shift();
+      if(r===targetRow) return path;
+      for(const [dr,dc] of dirs){
+        const nr=r+dr,nc=c+dc;
+        if(nr<0||nr>=size||nc<0||nc>=size) continue;
+        const k=key(nr,nc);
+        if(seen.has(k)) continue;
+        if(edgeBlocked([r,c],[nr,nc],extraWall)) continue;
+        if(positions.some((p,idx)=>idx!==playerIndex&&p[0]===nr&&p[1]===nc)) continue;
+        seen.add(k);
+        queue.push([nr,nc,[...path,[nr,nc]]]);
+      }
+    }
+    return [];
+  }
+
+  function scoreBarrierForBot(r,c,orientation){
+    const humanBefore=shortestPath(0).length || 999;
+    const botBefore=shortestPath(1).length || 999;
+    const candidate={r,c,orientation};
+    const humanAfter=shortestPath(0,candidate).length || 999;
+    const botAfter=shortestPath(1,candidate).length || 999;
+
+    // Good barriers slow the human more than the bot.
+    return (humanAfter-humanBefore)*3 - (botAfter-botBefore)*2;
+  }
+
+  function evaluateMoveForBot(move,difficulty){
+    const old=[...positions[1]];
+    positions[1]=move;
+
+    const botPath=shortestPath(1).length||999;
+    const humanPath=shortestPath(0).length||999;
+
+    positions[1]=old;
+
+    const k=key(move[0],move[1]);
+    const visits=botVisitedCounts[k]||0;
+    const immediateBacktrack=
+      botRecentPositions.length>=2 &&
+      botRecentPositions[botRecentPositions.length-2][0]===move[0] &&
+      botRecentPositions[botRecentPositions.length-2][1]===move[1];
+
+    let score=(humanPath-botPath)*6 + move[0]*5;
+
+    if(move[0]>old[0]) score+=14;
+    if(move[0]<old[0]) score-=18;
+
+    if(move[0]===size-1) score+=100000;
+
+    const visitPenalty={
+      easy:4,
+      normal:10,
+      human:18,
+      hard:40,
+      impossible:100
+    }[difficulty]||18;
+
+    score-=visits*visitPenalty;
+
+    if(immediateBacktrack){
+      score-={
+        easy:8,
+        normal:25,
+        human:60,
+        hard:200,
+        impossible:1000
+      }[difficulty]||60;
+    }
+
+    const centreDistance=Math.abs(move[1]-Math.floor(size/2));
+    score-=centreDistance*0.2;
+
+    return score;
+  }
+
+  function bestBarrierCandidates(limit=8){
+    const legal=[];
+    for(const orientation of ['horizontal','vertical']){
+      for(let rr=0;rr<size-1;rr++){
+        for(let cc=0;cc<size-1;cc++){
+          if(legalBarrierPlacement(rr,cc,orientation)){
+            legal.push({r:rr,c:cc,orientation,score:scoreBarrierForBot(rr,cc,orientation)});
+          }
+        }
+      }
+    }
+    legal.sort((a,b)=>b.score-a.score);
+    return legal.slice(0,Math.min(limit,legal.length));
+  }
+
+  function botBarrierTurn(){
+    if(!barrierVsBot || barrierPhase!=='playing' || currentGridPlayer!==1 || barrierBotBusy) return;
+    barrierBotBusy=true;
+
+    const difficulty=document.getElementById('barrierDifficulty').value;
+
+    const profiles={
+      easy:       {delay:[500,1000], wallChance:0.18, mistake:0.48, topMoves:4, barrierDepth:2},
+      normal:     {delay:[800,1500], wallChance:0.30, mistake:0.22, topMoves:3, barrierDepth:5},
+      human:      {delay:[1400,2800],wallChance:0.22, mistake:0.08, topMoves:2, barrierDepth:8},
+      hard:       {delay:[900,1700], wallChance:0.52, mistake:0.025,topMoves:1, barrierDepth:14},
+      impossible: {delay:[550,950],  wallChance:0.68, mistake:0,    topMoves:1, barrierDepth:40}
+    };
+
+    const profile=profiles[difficulty] || profiles.human;
+    const delay=profile.delay[0]+Math.floor(Math.random()*(profile.delay[1]-profile.delay[0]+1));
+
+    setTimeout(()=>{
+      try{
+        if(barrierPhase!=='playing' || currentGridPlayer!==1){
+          barrierBotBusy=false;
+          return;
+        }
+
+        const [r,c]=positions[1];
+
+        const rawMoves=[[r+1,c],[r,c-1],[r,c+1],[r-1,c]]
+          .filter(([nr,nc])=>nr>=0&&nr<size&&nc>=0&&nc<size&&validMove(nr,nc));
+
+        // Always win immediately when possible, regardless of difficulty.
+        const winningMove=rawMoves.find(([nr])=>nr===size-1);
+        if(winningMove){
+          positions[1]=winningMove;
+          addHistory('barrier',`🤖 Bot made the winning move.`);
+          botRecentPositions.push([...winningMove]);
+          botRecentPositions=botRecentPositions.slice(-8);
+          const winKey=key(winningMove[0],winningMove[1]);
+          botVisitedCounts[winKey]=(botVisitedCounts[winKey]||0)+1;
+          barrierBotBusy=false;
+          renderBoard();
+          checkWin();
+          return;
+        }
+
+        const shortest=shortestPath(1);
+        const nextOnShortest=shortest[0]||null;
+
+        const moves=rawMoves
+          .map(m=>{
+            let score=evaluateMoveForBot(m,difficulty);
+            if(nextOnShortest && m[0]===nextOnShortest[0] && m[1]===nextOnShortest[1]){
+              score+=difficulty==='impossible'?500:difficulty==='hard'?250:difficulty==='human'?120:60;
+            }
+            return {move:m,score};
+          })
+          .sort((a,b)=>b.score-a.score);
+
+        const botPath=shortest.length || 999;
+        const humanPath=shortestPath(0).length || 999;
+        const urgentHuman=humanPath<=2;
+        const behind=botPath>humanPath;
+
+        const barriersTop=barriersRemaining[1]>0
+          ? bestBarrierCandidates(profile.barrierDepth)
+          : [];
+
+        const bestBarrier=barriersTop[0];
+        let useBarrier=false;
+
+        // Difficulty-based barrier decisions.
+        if(bestBarrier){
+          if(difficulty==='human'){
+            // Human-like should usually move. It only blocks when the barrier is clearly useful,
+            // the opponent is close, or it is falling behind.
+            if(botConsecutiveBarriers===0){
+              if(urgentHuman && bestBarrier.score>=2){
+                useBarrier=Math.random()<0.65;
+              }else if(behind && bestBarrier.score>=3){
+                useBarrier=Math.random()<0.35;
+              }else if(bestBarrier.score>=5){
+                useBarrier=Math.random()<profile.wallChance;
+              }
+            }
+          }else{
+            if(urgentHuman && bestBarrier.score>0){
+              useBarrier=difficulty==='easy' ? Math.random()<0.45 : true;
+            }else if(behind && bestBarrier.score>=1){
+              useBarrier=Math.random()<Math.min(0.95,profile.wallChance+0.2);
+            }else if(bestBarrier.score>=3){
+              useBarrier=Math.random()<profile.wallChance;
+            }
+          }
+        }
+
+        // Impossible considers barriers even more aggressively.
+        if(difficulty==='impossible' && bestBarrier && bestBarrier.score>0){
+          useBarrier=urgentHuman || behind || bestBarrier.score>=2;
+        }
+
+        // Easy and Normal occasionally make poor choices.
+        if(difficulty!=='human' && profile.mistake>0 && Math.random()<profile.mistake){
+          useBarrier=Math.random()<0.25 && barriersTop.length>0;
+        }
+
+        if(useBarrier && barriersTop.length){
+          let pick=barriersTop[0];
+
+          if(profile.mistake>0 && Math.random()<profile.mistake){
+            pick=barriersTop[Math.floor(Math.random()*barriersTop.length)];
+          }
+
+          barriers.push({r:pick.r,c:pick.c,orientation:pick.orientation});
+          barriersRemaining[1]--;
+          addHistory('barrier',`🤖 Bot placed a barrier at row ${pick.r+1}, column ${pick.c+1}.`);
+          botConsecutiveBarriers++;
+          barrierBotBusy=false;
+          renderBoard();
+          switchGridTurn();
+          return;
+        }
+
+        if(moves.length){
+          const choicePool=moves.slice(0,Math.min(profile.topMoves,moves.length));
+          let chosen=choicePool[0];
+
+          if(profile.mistake>0 && Math.random()<profile.mistake){
+            chosen=moves[Math.floor(Math.random()*moves.length)];
+          }else if(choicePool.length>1 && difficulty==='human'){
+            // Human-like bot usually chooses a strong move, but not always the exact best.
+            chosen=choicePool[Math.floor(Math.random()*choicePool.length)];
+          }
+
+          positions[1]=chosen.move;
+          addHistory('barrier',`🤖 Bot moved to row ${chosen.move[0]+1}, column ${chosen.move[1]+1}.`);
+          botConsecutiveBarriers=0;
+          botRecentPositions.push([...chosen.move]);
+          botRecentPositions=botRecentPositions.slice(-4);
+
+          barrierBotBusy=false;
+          renderBoard();
+          if(checkWin()) return;
+          switchGridTurn();
+          return;
+        }
+
+        // Final fallback if trapped.
+        const fallbackWalls=[];
+        if(barriersRemaining[1]>0){
+          for(let rr=0;rr<size;rr++){
+            for(let cc=0;cc<size;cc++){
+              for(const orientation of ['horizontal','vertical']) if(legalBarrierPlacement(rr,cc,orientation)) fallbackWalls.push([rr,cc,orientation]);
+            }
+          }
+        }
+
+        if(fallbackWalls.length){
+          const [wr,wc,orientation]=fallbackWalls[Math.floor(Math.random()*fallbackWalls.length)];
+          barriers.push({r:wr,c:wc,orientation});
+          barriersRemaining[1]--;
+          botConsecutiveBarriers++;
+        }
+
+        barrierBotBusy=false;
+        renderBoard();
+        switchGridTurn();
+
+      }catch(error){
+        console.error(error);
+        barrierBotBusy=false;
+        barrierMessage.textContent='The bot recovered and passed its turn.';
+        switchGridTurn();
+      }
+    },delay);
+  }
+
+  function handleBoardClick(r,c){
+    if(barrierPhase!=='playing') return;
+    if(barrierVsBot && currentGridPlayer===1) return;
+
+    if(selectedAction==='move'){
+      saveBarrierSnapshot();
+      if(!validMove(r,c)){
+        barrierSnapshots.pop();
+        document.getElementById('barrierUndo').disabled=barrierSnapshots.length===0 || barrierVsBot;
+        barrierMessage.textContent='That move is not allowed.';
+        return;
+      }
+      addHistory('barrier',`${gPlayers[currentGridPlayer]} moved to row ${r+1}, column ${c+1}.`);
+      positions[currentGridPlayer]=[r,c];
+      beep('move');
+      renderBoard();
+      if(checkWin()) return;
+      switchGridTurn();
+    }else{
+      saveBarrierSnapshot();
+      if(barriersRemaining[currentGridPlayer]<=0){
+        barrierSnapshots.pop();
+        document.getElementById('barrierUndo').disabled=barrierSnapshots.length===0 || barrierVsBot;
+        barrierMessage.textContent='You have no barriers left.';
+        return;
+      }
+      if(!legalBarrierPlacement(r,c,wallOrientation)){
+        barrierSnapshots.pop();
+        document.getElementById('barrierUndo').disabled=barrierSnapshots.length===0 || barrierVsBot;
+        barrierMessage.textContent='That barrier would fully block a row/column or remove all paths.';
+        return;
+      }
+      barriers.push({r,c,orientation:wallOrientation});
+      barriersRemaining[currentGridPlayer]--;
+      addHistory('barrier',`${gPlayers[currentGridPlayer]} placed a barrier at row ${r+1}, column ${c+1}.`);
+      beep('wall');
+      renderBoard();
+      switchGridTurn();
+    }
+  }
+
+
+  const wallHorizontal=document.getElementById('wallHorizontal');
+  const wallVertical=document.getElementById('wallVertical');
+
+  function setWallOrientation(value){
+    wallOrientation=value;
+    wallHorizontal.classList.toggle('active',value==='horizontal');
+    wallVertical.classList.toggle('active',value==='vertical');
+    barrierMessage.textContent=`Barrier orientation: ${value}. Tap the top-left cell where the 2-space wall should begin.`;
+  }
+
+  wallHorizontal.addEventListener('click',()=>{
+    if(barrierVsBot&&currentGridPlayer===1)return;
+    setWallOrientation('horizontal');
+  });
+  wallVertical.addEventListener('click',()=>{
+    if(barrierVsBot&&currentGridPlayer===1)return;
+    setWallOrientation('vertical');
+  });
+
+  moveAction.addEventListener('click',()=>{
+    if(barrierVsBot && currentGridPlayer===1) return;
+    setAction('move');
+  });
+  wallAction.addEventListener('click',()=>{
+    if(barrierVsBot && currentGridPlayer===1) return;
+    setAction('wall');
+  });
+  document.getElementById('barrierStart').addEventListener('click',startBarrierGame);
+
+
+
+  ['bombSkin1','barrierSkin1'].forEach(id=>{
+    document.getElementById(id).addEventListener('change',e=>{
+      sharedSkins[0]=e.target.value;
+      document.getElementById(id==='bombSkin1'?'barrierSkin1':'bombSkin1').value=e.target.value;
+      saveSettings();
+    });
+  });
+  ['bombSkin2','barrierSkin2'].forEach(id=>{
+    document.getElementById(id).addEventListener('change',e=>{
+      sharedSkins[1]=e.target.value;
+      document.getElementById(id==='bombSkin2'?'barrierSkin2':'bombSkin2').value=e.target.value;
+      saveSettings();
+    });
+  });
+
+  document.getElementById('bombOpponent').addEventListener('change',()=>{
+    updateOpponentControls();
+    saveSettings();
+  });
+  document.getElementById('barrierOpponent').addEventListener('change',()=>{
+    updateOpponentControls();
+    saveSettings();
+  });
+
+  document.getElementById('bombRematch').addEventListener('click',startBombGame);
+  document.getElementById('barrierRematch').addEventListener('click',startBarrierGame);
+
+  document.getElementById('bombRulesBtn').addEventListener('click',()=>{
+    document.getElementById('bombRules').classList.toggle('show');
+  });
+  document.getElementById('barrierRulesBtn').addEventListener('click',()=>{
+    document.getElementById('barrierRules').classList.toggle('show');
+  });
+
+  document.getElementById('resetSavedBtn').addEventListener('click',()=>{
+    localStorage.removeItem('offlinePartyGamesSettings');
+    sharedNames=['Player 1','Player 2'];
+    sharedSkins=['😀','😎'];
+    savedHumanPlayer2Name='Player 2';
+    document.querySelectorAll('.shared-p1').forEach(x=>x.value='Player 1');
+    document.querySelectorAll('.shared-p2').forEach(x=>x.value='Player 2');
+    document.getElementById('bombSkin1').value='😀';
+    document.getElementById('bombSkin2').value='😎';
+    document.getElementById('barrierSkin1').value='😀';
+    document.getElementById('barrierSkin2').value='😎';
+    bombMessage.textContent='Saved settings cleared.';
+    updateOpponentControls();
+  });
+
+  loadSettings();
+  updateOpponentControls();
+
+
+  function applyToolStates(){
+    document.getElementById('soundToggle').classList.toggle('on',soundEnabled);
+    document.getElementById('soundToggle').textContent=soundEnabled?'🔊 Sound':'🔇 Muted';
+    document.getElementById('animationToggle').classList.toggle('on',animationsEnabled);
+    document.getElementById('animationToggle').textContent=animationsEnabled?'✨ Animations':'⏸ No Animations';
+    document.getElementById('compactToggle').classList.toggle('on',compactMode);
+    document.body.classList.toggle('no-animations',!animationsEnabled);
+    document.querySelector('.app').classList.toggle('compact',compactMode);
+  }
+
+  document.getElementById('soundToggle').addEventListener('click',()=>{
+    soundEnabled=!soundEnabled;
+    applyToolStates();
+    saveSettings();
+    if(soundEnabled) beep('move');
+  });
+
+  document.getElementById('animationToggle').addEventListener('click',()=>{
+    animationsEnabled=!animationsEnabled;
+    applyToolStates();
+    saveSettings();
+  });
+
+  document.getElementById('compactToggle').addEventListener('click',()=>{
+    compactMode=!compactMode;
+    applyToolStates();
+    saveSettings();
+  });
+
+  const fullscreenBtn=document.getElementById('fullscreenBtn');
+
+  function isRealFullscreen(){
+    return document.fullscreenElement ||
+           document.webkitFullscreenElement ||
+           document.msFullscreenElement;
+  }
+
+  function updateFullscreenButton(){
+    const active=Boolean(isRealFullscreen()) || document.body.classList.contains('fake-fullscreen');
+    fullscreenBtn.textContent=active?'⛶ Exit Fullscreen':'⛶ Fullscreen';
+    fullscreenBtn.classList.toggle('on',active);
+  }
+
+  fullscreenBtn.addEventListener('click',async()=>{
+    const docEl=document.documentElement;
+
+    if(isRealFullscreen()){
+      try{
+        if(document.exitFullscreen) await document.exitFullscreen();
+        else if(document.webkitExitFullscreen) document.webkitExitFullscreen();
+        else if(document.msExitFullscreen) document.msExitFullscreen();
+      }catch(e){}
+      document.body.classList.remove('fake-fullscreen');
+      updateFullscreenButton();
+      return;
+    }
+
+    if(document.body.classList.contains('fake-fullscreen')){
+      document.body.classList.remove('fake-fullscreen');
+      updateFullscreenButton();
+      return;
+    }
+
+    try{
+      if(docEl.requestFullscreen){
+        await docEl.requestFullscreen();
+      }else if(docEl.webkitRequestFullscreen){
+        docEl.webkitRequestFullscreen();
+      }else if(docEl.msRequestFullscreen){
+        docEl.msRequestFullscreen();
+      }else{
+        throw new Error('Fullscreen API unavailable');
+      }
+    }catch(e){
+      // Browsers can block real fullscreen for local file pages.
+      // This fallback expands the game to fill the browser window.
+      document.body.classList.add('fake-fullscreen');
+    }
+
+    updateFullscreenButton();
+  });
+
+  document.addEventListener('fullscreenchange',updateFullscreenButton);
+  document.addEventListener('webkitfullscreenchange',updateFullscreenButton);
+  document.addEventListener('MSFullscreenChange',updateFullscreenButton);
+
+  document.addEventListener('keydown',event=>{
+    if(event.key==='Escape' && document.body.classList.contains('fake-fullscreen')){
+      document.body.classList.remove('fake-fullscreen');
+      updateFullscreenButton();
+    }
+  });
+
+  document.getElementById('resetScoresBtn').addEventListener('click',()=>{
+    scores={bomb:{human:[0,0],bot:[0,0]},barrier:{human:[0,0],bot:[0,0]},ttt:{human:[0,0],bot:[0,0]}};
+    saveScores();
+    renderScores();
+    bombMessage.textContent='All scores reset.';
+    barrierMessage.textContent='All scores reset.';
+    tttMessage.textContent='All scores reset.';
+  });
+
+  document.addEventListener('keydown',e=>{
+    if(e.target.matches('input,select')) return;
+    if(e.key.toLowerCase()==='r'){
+      if(document.getElementById('bombGame').classList.contains('active')) startBombGame();
+      else if(document.getElementById('barrierGame').classList.contains('active')) startBarrierGame();
+      else startTtt();
+    }
+    if(e.key.toLowerCase()==='m'){
+      soundEnabled=!soundEnabled;
+      applyToolStates();
+      saveSettings();
+    }
+    if(e.key==='1'){
+      document.querySelector('[data-tab="bombGame"]').click();
+    }
+    if(e.key==='2'){
+      document.querySelector('[data-tab="barrierGame"]').click();
+    }
+    if(e.key==='3'){
+      document.querySelector('[data-tab="ticTacToeGame"]').click();
+    }
+  });
+
+
+  document.getElementById('bombQuickHuman').addEventListener('click',()=>{
+    document.getElementById('bombOpponent').value='human';
+    document.getElementById('chipCount').value='9';
+    updateOpponentControls();
+    startBombGame();
+  });
+
+  document.getElementById('bombQuickBot').addEventListener('click',()=>{
+    document.getElementById('bombOpponent').value='bot';
+    document.getElementById('bombDifficulty').value='human';
+    document.getElementById('chipCount').value='9';
+    updateOpponentControls();
+    startBombGame();
+  });
+
+  document.getElementById('barrierQuickHuman').addEventListener('click',()=>{
+    document.getElementById('barrierOpponent').value='human';
+    document.getElementById('barrierMode').value='classic';
+    updateOpponentControls();
+    startBarrierGame();
+  });
+
+  document.getElementById('barrierQuickBot').addEventListener('click',()=>{
+    document.getElementById('barrierOpponent').value='bot';
+    document.getElementById('barrierDifficulty').value='human';
+    document.getElementById('barrierMode').value='classic';
+    updateOpponentControls();
+    startBarrierGame();
+  });
+
+  document.getElementById('barrierUndo').addEventListener('click',()=>{
+    if(barrierVsBot || !barrierSnapshots.length || barrierPhase!=='playing') return;
+    const snap=barrierSnapshots.pop();
+    positions=snap.positions.map(p=>[...p]);
+    barriers=snap.barriers.map(w=>({...w}));
+    barriersRemaining=[...snap.barriersRemaining];
+    currentGridPlayer=snap.currentGridPlayer;
+    selectedAction=snap.selectedAction;
+    barrierHistory.shift();
+    document.getElementById('barrierHistory').innerHTML=barrierHistory.map(item=>`<li>${item}</li>`).join('');
+    renderBoard();
+    setAction(selectedAction);
+    barrierStatus.textContent=`${gPlayers[currentGridPlayer]}'s turn`;
+    markActiveScore('barrier',currentGridPlayer);
+    barrierMessage.textContent='Last turn undone.';
+    document.getElementById('barrierUndo').disabled=barrierSnapshots.length===0;
+  });
+
+
+  function resetGameScore(game){
+    const mode=currentScoreMode(game);
+    scores[game][mode]=[0,0];
+    saveScores();
+    renderScores();
+
+    const modeName=mode==='bot'?'Human vs Bot':'Human vs Human';
+    if(game==='bomb') bombMessage.textContent=`Bomb Chips ${modeName} score reset.`;
+    if(game==='barrier') barrierMessage.textContent=`Barrier Duel ${modeName} score reset.`;
+    if(game==='ttt') tttMessage.textContent=`Tic-Tac-Toe ${modeName} score reset.`;
+  }
+
+  document.getElementById('bombResetScore').addEventListener('click',()=>resetGameScore('bomb'));
+  document.getElementById('barrierResetScore').addEventListener('click',()=>resetGameScore('barrier'));
+  document.getElementById('tttResetScore').addEventListener('click',()=>resetGameScore('ttt'));
+
+  loadScores();
+  renderScores();
+  applyToolStates();
+
+
+  const tttBoardEl=document.getElementById('tttBoard');
+  const tttStatus=document.getElementById('tttStatus');
+  const tttMessage=document.getElementById('tttMessage');
+  const tttBotSpeech=document.getElementById('tttBotSpeech');
+  let tttBoard=Array(9).fill(''),tttCurrent=0,tttPlayers=['Player 1','Player 2'],tttVsBot=false,tttActive=false,tttBotBusy=false;
+  const tttWins=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+
+  function tttWinner(board){
+    for(const line of tttWins){const[a,b,c]=line;if(board[a]&&board[a]===board[b]&&board[a]===board[c])return{symbol:board[a],line};}
+    return null;
+  }
+
+  function renderTtt(){
+    tttBoardEl.innerHTML='';
+    tttBoard.forEach((value,index)=>{
+      const cell=document.createElement('button');
+      cell.className='ttt-cell';
+      if(value){cell.textContent=value;cell.classList.add(value==='X'?'x':'o');}
+      cell.disabled=!tttActive||Boolean(value)||(tttVsBot&&tttCurrent===1);
+      cell.addEventListener('click',()=>playTtt(index,false));
+      tttBoardEl.appendChild(cell);
+    });
+  }
+
+  function startTtt(){
+    syncSharedNames(document.getElementById('ticTacToeGame'));
+    tttVsBot=document.getElementById('tttOpponent').value==='bot';
+    sharedSkins[0]=document.getElementById('tttSkin1').value;
+    sharedSkins[1]=document.getElementById('tttSkin2').value;
+    tttPlayers=[`${sharedSkins[0]} ${sharedNames[0]}`,tttVsBot?'🤖 Bot':`${sharedSkins[1]} ${sharedNames[1]}`];
+    tttBoard=Array(9).fill('');tttCurrent=0;tttActive=true;tttBotBusy=false;
+    tttBotSpeech.classList.remove('show');
+    tttStatus.textContent=`${tttPlayers[0]}'s turn`;tttMessage.textContent='Place an X.';
+    renderScores();renderTtt();
+  }
+
+  function finishTtt(result){
+    tttActive=false;tttBotBusy=false;tttBotSpeech.classList.remove('show');
+    if(result){
+      const winnerIndex=result.symbol==='X'?0:1;
+      gameScore('ttt')[winnerIndex]++;saveScores();renderScores();
+      tttStatus.textContent=`${tttPlayers[winnerIndex]} wins!`;tttMessage.textContent='Three in a row.';beep('win');
+      [...tttBoardEl.children].forEach((cell,i)=>{cell.disabled=true;if(result.line.includes(i))cell.classList.add('win');});
+    }else{tttStatus.textContent='Draw!';tttMessage.textContent='No spaces left.';renderTtt();}
+  }
+
+  function playTtt(index,fromBot){
+    if(!tttActive||tttBoard[index]||(tttVsBot&&tttCurrent===1&&!fromBot))return;
+    tttBoard[index]=tttCurrent===0?'X':'O';beep('move');renderTtt();
+    const result=tttWinner(tttBoard);
+    if(result){finishTtt(result);return;}
+    if(tttBoard.every(Boolean)){finishTtt(null);return;}
+    tttCurrent=1-tttCurrent;
+    tttStatus.textContent=`${tttPlayers[tttCurrent]}'s turn`;
+    tttMessage.textContent=tttCurrent===0?'Place an X.':'Place an O.';
+    if(tttVsBot&&tttCurrent===1)runTttBot();else renderTtt();
+  }
+
+  function randomEmpty(board){const e=board.map((v,i)=>v?'':i).filter(v=>v!=='');return e[Math.floor(Math.random()*e.length)];}
+  function winningTttMove(board,symbol){
+    for(const i of board.map((v,i)=>v?'':i).filter(v=>v!=='')){const copy=[...board];copy[i]=symbol;if(tttWinner(copy))return i;}
+    return null;
+  }
+  function minimax(board,maximizing){
+    const win=tttWinner(board);if(win)return win.symbol==='O'?10:-10;if(board.every(Boolean))return 0;
+    const vals=[];for(const i of board.map((v,i)=>v?'':i).filter(v=>v!=='')){board[i]=maximizing?'O':'X';vals.push(minimax(board,!maximizing));board[i]='';}
+    return maximizing?Math.max(...vals):Math.min(...vals);
+  }
+  function impossibleTttMove(){
+    let best=-Infinity,move=null;
+    for(const i of tttBoard.map((v,i)=>v?'':i).filter(v=>v!=='')){tttBoard[i]='O';const score=minimax(tttBoard,false);tttBoard[i]='';if(score>best){best=score;move=i;}}
+    return move;
+  }
+
+  function runTttBot(){
+    if(tttBotBusy||!tttActive)return;tttBotBusy=true;renderTtt();
+    const d=document.getElementById('tttDifficulty').value;
+    const lines={easy:['Maybe this square.'],normal:['I should check the lines.'],human:['I am thinking ahead.'],hard:['I see the strongest move.'],impossible:['This board is solved.']};
+    tttBotSpeech.textContent=`🤖 ${lines[d][0]}`;tttBotSpeech.classList.add('show');
+    const delay=d==='human'?1500:d==='normal'?1000:d==='hard'?850:d==='impossible'?650:700;
+    setTimeout(()=>{
+      const win=winningTttMove(tttBoard,'O'),block=winningTttMove(tttBoard,'X');
+      let move;
+      if(d==='easy')move=randomEmpty(tttBoard);
+      else if(d==='normal')move=win??(Math.random()<.7?block:null)??randomEmpty(tttBoard);
+      else if(d==='human'){move=win??block; if(move===null){const p=[4,0,2,6,8,1,3,5,7].filter(i=>!tttBoard[i]);move=Math.random()<.82?p[0]:randomEmpty(tttBoard);}}
+      else if(d==='hard')move=win??block??impossibleTttMove();
+      else move=impossibleTttMove();
+      tttBotBusy=false;tttBotSpeech.classList.remove('show');playTtt(move,true);
+    },delay);
+  }
+
+  document.getElementById('tttStart').addEventListener('click',startTtt);
+  document.getElementById('tttRematch').addEventListener('click',startTtt);
+  document.getElementById('tttRulesBtn').addEventListener('click',()=>document.getElementById('tttRules').classList.toggle('show'));
+  document.getElementById('tttOpponent').addEventListener('change',()=>{
+    updateOpponentControls();
+    refreshScoreDisplays();
+  });
+  renderTtt();
+
+  window.addEventListener('resize',()=>{if(document.getElementById('barrierGame').classList.contains('active'))renderBoard();});
+
+  const initial=modeSettings('classic');
+  size=initial.size;
+  modeInfo.textContent=initial.info;
+  renderBoard();
+})();
+</script>
+<div class="site-label">offlinepartygames.html</div>
+<div class="corner-credit">
+  <strong>Sub to Ascended Pumpkin Gaming</strong><br>
+  Made by Shabdmeet Insan
+</div>
+</body>
+</html>
